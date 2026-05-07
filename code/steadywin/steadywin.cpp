@@ -1,5 +1,37 @@
 #include "steadywin.h"
 
+int Steadywin::reset_config()
+{
+    struct can_frame frame;
+    frame.can_id = id;
+    frame.can_dlc = 8;
+    frame.data[0] = RESET_CONFIG;
+    frame.data[1] = 0x00;
+    frame.data[2] = 0x00;
+    frame.data[3] = 0x00;
+    frame.data[4] = 0x00;
+    frame.data[5] = 0x00;
+    frame.data[6] = 0x00;
+    frame.data[7] = 0x00;
+
+    if (can->sendFrame(frame)) {
+        std::cout << "Frame sent\n";
+    }
+
+    struct can_frame recv_frame;
+    int retval;
+
+    while (true) {
+        if (can->receiveFrame(recv_frame)) {
+            retval  = recv_frame.data[1];
+            std::cout << "Return value: " << retval << "\n";
+            break;
+        }
+    }
+    
+    return  retval;    
+}
+
 int32_t Steadywin::get_gear_ratio()
 {
     
@@ -248,6 +280,8 @@ int Steadywin::speed_control(float _speed, uint32_t duration)
     frame.data[5] = dur.u8[0];
     frame.data[6] = dur.u8[1];
     frame.data[7] = dur.u8[2];
+
+    
 
     if (can->sendFrame(frame)) {
         std::cout << "Frame sent\n";

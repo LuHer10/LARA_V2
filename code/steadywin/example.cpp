@@ -73,18 +73,24 @@ int main() {
 
     Steadywin m1(&can, 0x01);
 
-    //retval = m1.mod_config(0x02, 384);
+    //retval = m1.mod_config(MAX_SPEED, 250);
     //printf("%d\n", data);
     //retval = m1.retr_config(0x17, data);
     //printf("%d\n", data);
     
-    m1.start_motor();
-    //m1.speed_control(0.0f, 0);
-    m1.pos_control(1.0f, 10000);
-    m1.get_gear_ratio();
-    m1.get_torq_const();
+    //m1.reset_config();
+
+    //m1.start_motor();
+    //m1.speed_control(0.0f, 100);
+    //std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+    m1.pos_control(0.0f, 500);
+    //for(int i = 0x00; i < 0x19; i++){
+    //m1.retr_config(0x18, data);
+    //std::cout << "CAN_BAUD_RATE: " << data << "\n";//}
+    //m1.get_gear_ratio();
+    //m1.get_torq_const();
     m1.get_fault();
-    retval = m1.stop_motor();
+    //retval = m1.stop_motor();
     //printf("%d\n", retval);
    
 
