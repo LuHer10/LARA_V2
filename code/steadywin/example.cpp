@@ -31,11 +31,11 @@ int main() {
 
     /*
     struct can_frame frame;
-    frame.can_id = 0x01;
+    frame.can_id = 0x02;
     frame.can_dlc = 8;
     frame.data[0] = 0x84;
     frame.data[1] = 0x00;
-    frame.data[2] = 0x06;
+    frame.data[2] = 0x17;
     frame.data[3] = 0x00;
     frame.data[4] = 0x00;
     frame.data[5] = 0x00;
@@ -54,6 +54,7 @@ int main() {
             break;
         } else {
             // No data → do other work
+            //std::cout << "Error\n";
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
         }
     }
@@ -64,25 +65,28 @@ int main() {
             + ((int32_t)recv_frame.data[5] << 8)
             + ((int32_t)recv_frame.data[4]);
     std::cout << "Result: " << (int)result << "\n";
+    
     */
-    /* */
+    
     int32_t data;// = 10;
     int retval;
 
     Steadywin m1(&can, 0x01);
 
-    //retval = m1.mod_config(0x17, data);
+    //retval = m1.mod_config(0x02, 384);
     //printf("%d\n", data);
-    retval = m1.retr_config(0x17, data);
-    printf("%d\n", data);
+    //retval = m1.retr_config(0x17, data);
+    //printf("%d\n", data);
     
-    //m1.start_motor();
-    //m1.speed_control(60.0f, 0);
+    m1.start_motor();
+    //m1.speed_control(0.0f, 0);
+    m1.pos_control(1.0f, 10000);
     m1.get_gear_ratio();
     m1.get_torq_const();
-    //retval = m1.stop_motor();
+    m1.get_fault();
+    retval = m1.stop_motor();
     //printf("%d\n", retval);
-   /* */
+   
 
     return 0;
 }

@@ -123,6 +123,9 @@ public:
     int pos_control(float _pos, uint32_t duration);
     int stop_control();
 
+    int get_fault();
+
+
 
 
 };

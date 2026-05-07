@@ -8,6 +8,44 @@ int32_t Steadywin::get_gear_ratio()
     return gear_ratio;
 }
 
+int Steadywin::get_fault()
+{
+    
+    struct can_frame frame;
+    frame.can_id = id;
+    frame.can_dlc = 8;
+    frame.data[0] = GET_FAULT;
+    frame.data[1] = 0x00;
+    frame.data[2] = 0x00;
+    frame.data[3] = 0x00;
+    frame.data[4] = 0x00;
+    frame.data[5] = 0x00;
+    frame.data[6] = 0x00;
+    frame.data[7] = 0x00;
+
+    if (can->sendFrame(frame)) {
+        std::cout << "Frame sent\n";
+    }
+
+    struct can_frame recv_frame;
+    int retval;
+    int faul;
+
+    while (true) {
+        if (can->receiveFrame(recv_frame)) {
+            retval  = recv_frame.data[1];
+            std::cout << "Return value: " << retval << "\n";
+            break;
+        }
+    }
+
+    faul = recv_frame.data[2]; 
+
+    std::cout << "Fault no.: " << faul << "\n";
+    
+    return faul;    
+}
+
 float Steadywin::get_torq_const()
 {
     struct can_frame frame;
@@ -245,3 +283,61 @@ int Steadywin::speed_control(float _speed, uint32_t duration)
     return  retval;
     
 }
+
+int Steadywin::pos_control(float _pos, uint32_t duration)
+{
+
+    fl32u8 ang;
+    ang.fl = _pos;
+
+    u32u8 dur;
+    dur.u32  = duration;
+
+    struct can_frame frame;
+    frame.can_id = id;
+    frame.can_dlc = 8;
+    frame.data[0] = POSITION_CONTROL;
+    frame.data[1] = ang.u8[0];
+    frame.data[2] = ang.u8[1];
+    frame.data[3] = ang.u8[2];
+    frame.data[4] = ang.u8[3];
+    frame.data[5] = dur.u8[0];
+    frame.data[6] = dur.u8[1];
+    frame.data[7] = dur.u8[2];
+
+    if (can->sendFrame(frame)) {
+        std::cout << "Frame sent\n";
+    }
+
+    struct can_frame recv_frame;
+    int retval;
+
+    while (true) {
+        if (can->receiveFrame(recv_frame)) {
+            retval  = recv_frame.data[1];
+            std::cout << "Return value: " << retval << "\n";
+            break;
+        }
+    }
+
+    temp = recv_frame.data[2];
+
+    int32_t pos_int = recv_frame.data[3]
+                    + (recv_frame.data[4] << 8);
+    pos = pos_int * 25.0f / 65535.0f - 12.5f;
+    std::cout << "pos_int: " << pos_int << "\n";
+
+    int32_t speed_int = (recv_frame.data[5] << 4)
+                    +  ((recv_frame.data[6] & 0xf0) >> 4);
+    speed = speed_int * 130.0f / 4095.0f - 65.0f;
+
+    int32_t torque_int = recv_frame.data[7]
+                    + ((recv_frame.data[6] & 0x0f) << 8);
+    torque = torque_int * (450.0f * torq_const * gear_ratio)/4095.0f 
+                - 225.0f * torq_const * gear_ratio;
+
+    
+    return  retval;
+    
+}
+

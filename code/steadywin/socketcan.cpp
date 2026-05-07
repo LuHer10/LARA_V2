@@ -91,6 +91,7 @@ bool SocketCAN::receiveFrame(struct can_frame& frame) {
     if (!is_open_) return false;
 
     int nbytes = read(socket_, &frame, sizeof(frame));
+    //std::cout << nbytes << "\n"; 
 
     if (nbytes < 0) {
         if (errno == EAGAIN || errno == EWOULDBLOCK) {
