@@ -375,3 +375,42 @@ int Steadywin::pos_control(float _pos, uint32_t duration)
     
 }
 
+float Steadywin::get_position()
+{
+    fl32u8 ang;
+
+    struct can_frame frame;
+    frame.can_id = id;
+    frame.can_dlc = 8;
+    frame.data[0] = RETRIEVE_INDICATOR;
+    frame.data[1] = ANGLE_OUTPUT_MEC;
+    frame.data[2] = 0x00;
+    frame.data[3] = 0x00;
+    frame.data[4] = 0x00;
+    frame.data[5] = 0x00;
+    frame.data[6] = 0x00;
+    frame.data[7] = 0x00;
+
+    if (can->sendFrame(frame)) {
+        std::cout << "Frame sent\n";
+    }
+
+    struct can_frame recv_frame;
+    int retval;
+
+    while (true) {
+        if (can->receiveFrame(recv_frame)) {
+            retval  = recv_frame.data[2];
+            std::cout << "Return value: " << retval << "\n";
+            break;
+        }
+    }
+
+    ang.u8[0] = recv_frame.data[4];
+    ang.u8[1] = recv_frame.data[5];
+    ang.u8[2] = recv_frame.data[6];
+    ang.u8[3] = recv_frame.data[7];
+
+    return ang.fl;
+    
+}

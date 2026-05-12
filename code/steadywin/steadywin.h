@@ -57,6 +57,32 @@ typedef enum
     CAN_PROTOCOL         = 0x1C
 } CONF_ID;
 
+typedef enum
+{
+    BUS_VOLTAGE       = 0X00,
+    DRIVER_BOARD_TEMP = 0X01,
+    MOTOR_TEMP        = 0X02,
+    POWER             = 0X03,
+    I_A               = 0X04,
+    I_B               = 0X05,
+    I_C               = 0X06,
+    I_ALPHA           = 0X07,
+    I_BETA            = 0X08,
+    I_Q               = 0x09,
+    I_D               = 0X0A,
+    TARGET_IQ         = 0X0B,
+    TARGET_ID         = 0X0C,
+    V_Q               = 0X0D,
+    V_D               = 0X0E,
+    V_ALPHA           = 0X0F,
+    V_BETA            = 0X10,
+    ANGLE_ROTOR_ELEC  = 0X11,
+    ANGLE_ROTOR_MEC   = 0X12,
+    ANGLE_OUTPUT_MEC  = 0X13,
+    OUTPUT_SPEED      = 0X14,
+    OUTPUT_POWER      = 0X15
+} IND_ID;
+
 union fl32u8
 {
     float fl;
@@ -122,6 +148,8 @@ public:
     int speed_control(float _speed, uint32_t duration);
     int pos_control(float _pos, uint32_t duration);
     int stop_control();
+
+    float get_position();
 
     int get_fault();
 
