@@ -144,9 +144,10 @@ public:
 
     int start_motor();
     int stop_motor();
-    int torque_control(float _torque, uint32_t duration);
-    int speed_control(float _speed, uint32_t duration);
-    int pos_control(float _pos, uint32_t duration);
+    int torque_control(float _torque, uint32_t duration = 0);
+    int speed_control(float _speed, uint32_t duration = 0);
+    int pos_control(float _pos, uint32_t duration = 0);
+    int pos_control_deg(float _pos, uint32_t duration = 0);
     int stop_control();
 
     float get_position();

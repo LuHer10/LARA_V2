@@ -322,10 +322,12 @@ int Steadywin::pos_control(float _pos, uint32_t duration)
 {
 
     fl32u8 ang;
-    ang.fl = _pos;
-
+    ang.fl = _pos - (79.7f*3.1415926f/180.0f); 
     u32u8 dur;
     dur.u32  = duration;
+
+    //std::cout << std::hex << (int)ang.u8[0] << " " << (int)ang.u8[1] << " " << (int)ang.u8[2] << " " << (int)ang.u8[3] << "\n";
+    //std::cout << (float)ang.fl << "\n";
 
     struct can_frame frame;
     frame.can_id = id;
@@ -338,6 +340,8 @@ int Steadywin::pos_control(float _pos, uint32_t duration)
     frame.data[5] = dur.u8[0];
     frame.data[6] = dur.u8[1];
     frame.data[7] = dur.u8[2];
+
+    
 
     if (can->sendFrame(frame)) {
         std::cout << "Frame sent\n";
@@ -358,8 +362,13 @@ int Steadywin::pos_control(float _pos, uint32_t duration)
 
     int32_t pos_int = recv_frame.data[3]
                     + (recv_frame.data[4] << 8);
-    pos = pos_int * 25.0f / 65535.0f - 12.5f;
+    pos_int = pos_int - 44276;
+    //pos = ((pos_int * 25.0f / 65535.0f) - 12.5f) - 4.38563f;
+    pos = pos_int * 25.0f / 65535.0f;
     std::cout << "pos_int: " << pos_int << "\n";
+    std::cout << "pos (RAD): " << pos << "\n";
+    std::cout << "pos (DEG): " << (pos * 180.0f / 3.1415926f) << "\n";
+
 
     int32_t speed_int = (recv_frame.data[5] << 4)
                     +  ((recv_frame.data[6] & 0xf0) >> 4);
@@ -374,6 +383,51 @@ int Steadywin::pos_control(float _pos, uint32_t duration)
     return  retval;
     
 }
+
+int Steadywin::pos_control_deg(float _pos, uint32_t duration)
+{
+
+    float ang;
+    ang = _pos * 3.1415926f / 180.0f; // Convert degrees to radians
+
+    int retval = pos_control(ang, duration);
+    return  retval;
+    
+}
+
+int Steadywin::stop_control()
+{
+    struct can_frame frame;
+    frame.can_id = id;
+    frame.can_dlc = 8;
+    frame.data[0] = STOP_CONTROL;
+    frame.data[1] = 0x00;
+    frame.data[2] = 0x00;
+    frame.data[3] = 0x00;
+    frame.data[4] = 0x00;
+    frame.data[5] = 0x00;
+    frame.data[6] = 0x00;
+    frame.data[7] = 0x00;
+
+    if (can->sendFrame(frame)) {
+        std::cout << "Frame sent\n";
+    }
+
+    struct can_frame recv_frame;
+    int retval;
+
+    while (true) {
+        if (can->receiveFrame(recv_frame)) {
+            retval  = recv_frame.data[1];
+            std::cout << "Return value: " << retval << "\n";
+            break;
+        }
+    }
+
+    
+    return  retval;
+}
+
 
 float Steadywin::get_position()
 {
@@ -411,6 +465,6 @@ float Steadywin::get_position()
     ang.u8[2] = recv_frame.data[6];
     ang.u8[3] = recv_frame.data[7];
 
-    return ang.fl;
+    return (float)ang.fl;
     
 }
