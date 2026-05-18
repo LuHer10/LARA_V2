@@ -25,6 +25,7 @@ typedef enum
     GET_FAULT          = 0xB2,
     ACK_FAULT          = 0xB3,
     RETRIEVE_INDICATOR = 0xB4,
+    CALIBRATE          = 0xB5,
 
     UPDATE_FIRMWARE = 0xC1
 } COMMANDS;
@@ -149,6 +150,17 @@ public:
     int pos_control(float _pos, uint32_t duration = 0);
     int pos_control_deg(float _pos, uint32_t duration = 0);
     int stop_control();
+
+    int mod_param(int param_id, uint32_t value);
+    int retr_param(int param_id, uint32_t& value);
+
+    int get_version();
+    int get_fault();
+    int ack_fault();
+    int retr_indicator(int ind_id, float& value);
+    int calibrate(int calib_type);
+
+    void update_firmware();
 
     float get_position();
 

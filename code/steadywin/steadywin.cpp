@@ -32,21 +32,12 @@ int Steadywin::reset_config()
     return  retval;    
 }
 
-int32_t Steadywin::get_gear_ratio()
+int Steadywin::refresh_config()
 {
-    
-    retr_config(GEAR_RATIO, gear_ratio);
-    std::cout << "Gear ratio is: " << gear_ratio << ":1\n";
-    return gear_ratio;
-}
-
-int Steadywin::get_fault()
-{
-    
     struct can_frame frame;
     frame.can_id = id;
     frame.can_dlc = 8;
-    frame.data[0] = GET_FAULT;
+    frame.data[0] = REFRESH_CONFIG;
     frame.data[1] = 0x00;
     frame.data[2] = 0x00;
     frame.data[3] = 0x00;
@@ -61,7 +52,6 @@ int Steadywin::get_fault()
 
     struct can_frame recv_frame;
     int retval;
-    int faul;
 
     while (true) {
         if (can->receiveFrame(recv_frame)) {
@@ -71,52 +61,7 @@ int Steadywin::get_fault()
         }
     }
 
-    faul = recv_frame.data[2]; 
-
-    std::cout << "Fault no.: " << faul << "\n";
-    
-    return faul;    
-}
-
-float Steadywin::get_torq_const()
-{
-    struct can_frame frame;
-    frame.can_id = id;
-    frame.can_dlc = 8;
-    frame.data[0] = RETRIEVE_CONFIG;
-    frame.data[1] = 0x01;
-    frame.data[2] = 0x03;
-    frame.data[3] = 0x00;
-    frame.data[4] = 0x00;
-    frame.data[5] = 0x00;
-    frame.data[6] = 0x00;
-    frame.data[7] = 0x00;
-
-    if (can->sendFrame(frame)) {
-        std::cout << "Frame sent\n";
-    }
-
-    struct can_frame recv_frame;
-    int retval;
-
-    while (true) {
-        if (can->receiveFrame(recv_frame)) {
-            retval  = recv_frame.data[3];
-            std::cout << "Return value: " << retval << "\n";
-            break;
-        }
-    }
-
-    fl32u8 res;
-    res.u8[0] = recv_frame.data[4];
-    res.u8[1] = recv_frame.data[5];
-    res.u8[2] = recv_frame.data[6];
-    res.u8[3] = recv_frame.data[7];
-
-    torq_const = res.fl;
-    std::cout << "Torque constant is: " << torq_const << " N.m/A\n";
-    
-    return torq_const;    
+    return  retval;
 }
 
 int Steadywin::mod_config(int confid, int32_t data)
@@ -193,6 +138,55 @@ int Steadywin::retr_config(uint8_t confid, int32_t& data)
     
 }
 
+int32_t Steadywin::get_gear_ratio()
+{
+    
+    retr_config(GEAR_RATIO, gear_ratio);
+    std::cout << "Gear ratio is: " << gear_ratio << ":1\n";
+    return gear_ratio;
+}
+
+float Steadywin::get_torq_const()
+{
+    struct can_frame frame;
+    frame.can_id = id;
+    frame.can_dlc = 8;
+    frame.data[0] = RETRIEVE_CONFIG;
+    frame.data[1] = 0x01;
+    frame.data[2] = 0x03;
+    frame.data[3] = 0x00;
+    frame.data[4] = 0x00;
+    frame.data[5] = 0x00;
+    frame.data[6] = 0x00;
+    frame.data[7] = 0x00;
+
+    if (can->sendFrame(frame)) {
+        std::cout << "Frame sent\n";
+    }
+
+    struct can_frame recv_frame;
+    int retval;
+
+    while (true) {
+        if (can->receiveFrame(recv_frame)) {
+            retval  = recv_frame.data[3];
+            std::cout << "Return value: " << retval << "\n";
+            break;
+        }
+    }
+
+    fl32u8 res;
+    res.u8[0] = recv_frame.data[4];
+    res.u8[1] = recv_frame.data[5];
+    res.u8[2] = recv_frame.data[6];
+    res.u8[3] = recv_frame.data[7];
+
+    torq_const = res.fl;
+    std::cout << "Torque constant is: " << torq_const << " N.m/A\n";
+    
+    return torq_const;    
+}
+
 int Steadywin::start_motor()
 {
     struct can_frame frame;
@@ -258,6 +252,63 @@ int Steadywin::stop_motor()
     
     return  retval;
 
+}
+
+int Steadywin::torque_control(float _torque, uint32_t duration)
+{
+
+    fl32u8 trq;
+    trq.fl = _torque;
+    u32u8 dur;
+    dur.u32  = duration;
+
+    struct can_frame frame;
+    frame.can_id = id;
+    frame.can_dlc = 8;
+    frame.data[0] = TORQUE_CONTROL;
+    frame.data[1] = trq.u8[0];
+    frame.data[2] = trq.u8[1];
+    frame.data[3] = trq.u8[2];
+    frame.data[4] = trq.u8[3];
+    frame.data[5] = dur.u8[0];
+    frame.data[6] = dur.u8[1];
+    frame.data[7] = dur.u8[2];
+
+    
+
+    if (can->sendFrame(frame)) {
+        std::cout << "Frame sent\n";
+    }
+
+    struct can_frame recv_frame;
+    int retval;
+
+    while (true) {
+        if (can->receiveFrame(recv_frame)) {
+            retval  = recv_frame.data[1];
+            std::cout << "Return value: " << retval << "\n";
+            break;
+        }
+    }
+
+    temp = recv_frame.data[2];
+
+    int32_t pos_int = recv_frame.data[3]
+                    + (recv_frame.data[4] << 8);
+    pos = pos_int * 25.0f / 65535.0f - 12.5f;
+
+    int32_t speed_int = (recv_frame.data[5] << 4)
+                    +  ((recv_frame.data[6] & 0xf0) >> 4);
+    speed = speed_int * 130.0f / 4095.0f - 65.0f;
+
+    int32_t torque_int = recv_frame.data[7]
+                    + ((recv_frame.data[6] & 0x0f) << 8);
+    torque = torque_int * (450.0f * torq_const * gear_ratio)/4095.0f 
+                - 225.0f * torq_const * gear_ratio;
+
+    
+    return  retval;
+    
 }
 
 int Steadywin::speed_control(float _speed, uint32_t duration)
@@ -467,4 +518,287 @@ float Steadywin::get_position()
 
     return (float)ang.fl;
     
+}
+
+int Steadywin::mod_param(int param_id, uint32_t value)
+{
+    u32u8 val;
+    val.u32 = value;
+
+    struct can_frame frame;
+    frame.can_id = id;
+    frame.can_dlc = 8;
+    frame.data[0] = MODIFY_PARAM;
+    frame.data[1] = param_id;
+    frame.data[2] = 0x00;
+    frame.data[3] = 0x00;
+    frame.data[4] = val.u8[0];
+    frame.data[5] = val.u8[1];
+    frame.data[6] = val.u8[2];
+    frame.data[7] = val.u8[3];
+
+    if (can->sendFrame(frame)) {
+        std::cout << "Frame sent\n";
+    }
+
+    struct can_frame recv_frame;
+    int retval;
+
+    while (true) {
+        if (can->receiveFrame(recv_frame)) {
+            retval  = recv_frame.data[2];
+            std::cout << "Return value: " << retval << "\n";
+            break;
+        }
+    }
+
+    return  retval;
+}
+
+int Steadywin::retr_param(int param_id, uint32_t& value)
+{
+    struct can_frame frame;
+    frame.can_id = id;
+    frame.can_dlc = 8;
+    frame.data[0] = RETRIEVE_PARAM;
+    frame.data[1] = param_id;
+    frame.data[2] = 0x00;
+    frame.data[3] = 0x00;
+    frame.data[4] = 0x00;
+    frame.data[5] = 0x00;
+    frame.data[6] = 0x00;
+    frame.data[7] = 0x00;
+
+    if (can->sendFrame(frame)) {
+        std::cout << "Frame sent\n";
+    }
+
+    struct can_frame recv_frame;
+    int retval;
+
+    while (true) {
+        if (can->receiveFrame(recv_frame)) {
+            retval  = recv_frame.data[2];
+            std::cout << "Return value: " << retval << "\n";
+            break;
+        }
+    }
+
+    value = ((uint32_t)recv_frame.data[7] << 24)
+            + ((uint32_t)recv_frame.data[6] << 16)
+            + ((uint32_t)recv_frame.data[5] << 8)
+            + ((uint32_t)recv_frame.data[4]);
+
+    
+    return  retval;    
+}
+
+int Steadywin::get_version()
+{
+    int ver;
+    u32u8 _ver;
+
+    struct can_frame frame;
+    frame.can_id = id;
+    frame.can_dlc = 8;
+    frame.data[0] = GET_VERSION;
+    frame.data[1] = 0x00;
+    frame.data[2] = 0x00;
+    frame.data[3] = 0x00;
+    frame.data[4] = 0x00;
+    frame.data[5] = 0x00;
+    frame.data[6] = 0x00;
+    frame.data[7] = 0x00;
+
+    if (can->sendFrame(frame)) {
+        std::cout << "Frame sent\n";
+    }
+
+    struct can_frame recv_frame;
+    int retval;
+
+    while (true) {
+        if (can->receiveFrame(recv_frame)) {
+            retval  = recv_frame.data[1];
+            std::cout << "Return value: " << retval << "\n";
+            break;
+        }
+    }
+
+    _ver.u8[0] = recv_frame.data[4];
+    _ver.u8[1] = recv_frame.data[5];
+    _ver.u8[2] = recv_frame.data[6];
+    _ver.u8[3] = recv_frame.data[7];
+
+    ver = _ver.u32;
+
+    std::cout << "Firmware version: " << ver << "\n";
+
+    return  ver;    
+}
+
+int Steadywin::get_fault()
+{
+    
+    struct can_frame frame;
+    frame.can_id = id;
+    frame.can_dlc = 8;
+    frame.data[0] = GET_FAULT;
+    frame.data[1] = 0x00;
+    frame.data[2] = 0x00;
+    frame.data[3] = 0x00;
+    frame.data[4] = 0x00;
+    frame.data[5] = 0x00;
+    frame.data[6] = 0x00;
+    frame.data[7] = 0x00;
+
+    if (can->sendFrame(frame)) {
+        std::cout << "Frame sent\n";
+    }
+
+    struct can_frame recv_frame;
+    int retval;
+    int faul;
+
+    while (true) {
+        if (can->receiveFrame(recv_frame)) {
+            retval  = recv_frame.data[1];
+            std::cout << "Return value: " << retval << "\n";
+            break;
+        }
+    }
+
+    faul = recv_frame.data[2]; 
+
+    std::cout << "Fault no.: " << faul << "\n";
+    
+    return faul;    
+}
+
+int Steadywin::ack_fault()
+{
+    struct can_frame frame;
+    frame.can_id = id;
+    frame.can_dlc = 8;
+    frame.data[0] = ACK_FAULT;
+    frame.data[1] = 0x00;
+    frame.data[2] = 0x00;
+    frame.data[3] = 0x00;
+    frame.data[4] = 0x00;
+    frame.data[5] = 0x00;
+    frame.data[6] = 0x00;
+    frame.data[7] = 0x00;
+
+    if (can->sendFrame(frame)) {
+        std::cout << "Frame sent\n";
+    }
+
+    struct can_frame recv_frame;
+    int retval;
+
+    while (true) {
+        if (can->receiveFrame(recv_frame)) {
+            retval  = recv_frame.data[1];
+            std::cout << "Return value: " << retval << "\n";
+            break;
+        }
+    }
+
+    
+    return  retval;    
+}
+
+int Steadywin::retr_indicator(int ind_id, float& value)
+{
+    fl32u8 val;
+
+    struct can_frame frame;
+    frame.can_id = id;
+    frame.can_dlc = 8;
+    frame.data[0] = RETRIEVE_INDICATOR;
+    frame.data[1] = ind_id;
+    frame.data[2] = 0x00;
+    frame.data[3] = 0x00;
+    frame.data[4] = 0x00;
+    frame.data[5] = 0x00;
+    frame.data[6] = 0x00;
+    frame.data[7] = 0x00;
+
+    if (can->sendFrame(frame)) {
+        std::cout << "Frame sent\n";
+    }
+
+    struct can_frame recv_frame;
+    int retval;
+
+    while (true) {
+        if (can->receiveFrame(recv_frame)) {
+            retval  = recv_frame.data[2];
+            std::cout << "Return value: " << retval << "\n";
+            break;
+        }
+    }
+
+    val.u8[0] = recv_frame.data[4];
+    val.u8[1] = recv_frame.data[5];
+    val.u8[2] = recv_frame.data[6];
+    val.u8[3] = recv_frame.data[7];
+
+    value = val.fl;
+
+    
+    return  retval;    
+}
+
+int Steadywin::calibrate(int calib_type)
+{
+    struct can_frame frame;
+    frame.can_id = id;
+    frame.can_dlc = 8;
+    frame.data[0] = CALIBRATE;
+    frame.data[1] = calib_type;
+    frame.data[2] = 0x00;
+    frame.data[3] = 0x00;
+    frame.data[4] = 0x00;
+    frame.data[5] = 0x00;
+    frame.data[6] = 0x00;
+    frame.data[7] = 0x00;
+
+    if (can->sendFrame(frame)) {
+        std::cout << "Frame sent\n";
+    }
+
+    struct can_frame recv_frame;
+    int retval;
+
+    while (true) {
+        if (can->receiveFrame(recv_frame)) {
+            retval  = recv_frame.data[2];
+            std::cout << "Return value: " << retval << "\n";
+            break;
+        }
+    }
+
+    
+    return  retval;    
+}
+
+void Steadywin::update_firmware()
+{
+    struct can_frame frame;
+    frame.can_id = id;
+    frame.can_dlc = 8;
+    frame.data[0] = UPDATE_FIRMWARE;
+    frame.data[1] = 0x00;
+    frame.data[2] = 0x00;
+    frame.data[3] = 0x00;
+    frame.data[4] = 0x00;
+    frame.data[5] = 0x00;
+    frame.data[6] = 0x00;
+    frame.data[7] = 0x00;
+
+    if (can->sendFrame(frame)) {
+        std::cout << "Frame sent\n";
+    }
+
 }
