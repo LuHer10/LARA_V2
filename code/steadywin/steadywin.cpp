@@ -15,7 +15,9 @@ int Steadywin::reset_config()
     frame.data[7] = 0x00;
 
     if (can->sendFrame(frame)) {
+        #ifdef DEBUG
         std::cout << "Frame sent\n";
+        #endif
     }
 
     struct can_frame recv_frame;
@@ -24,7 +26,9 @@ int Steadywin::reset_config()
     while (true) {
         if (can->receiveFrame(recv_frame)) {
             retval  = recv_frame.data[1];
+            #ifdef DEBUG
             std::cout << "Return value: " << retval << "\n";
+            #endif
             break;
         }
     }
@@ -47,7 +51,9 @@ int Steadywin::refresh_config()
     frame.data[7] = 0x00;
 
     if (can->sendFrame(frame)) {
+        #ifdef DEBUG
         std::cout << "Frame sent\n";
+        #endif
     }
 
     struct can_frame recv_frame;
@@ -55,8 +61,13 @@ int Steadywin::refresh_config()
 
     while (true) {
         if (can->receiveFrame(recv_frame)) {
+            #ifdef DEBUG
+            std::cout << "Received frame\n";
+            #endif
             retval  = recv_frame.data[1];
+            #ifdef DEBUG
             std::cout << "Return value: " << retval << "\n";
+            #endif
             break;
         }
     }
@@ -82,7 +93,9 @@ int Steadywin::mod_config(int confid, int32_t data)
     frame.data[7] = _data.u8[3];
 
     if (can->sendFrame(frame)) {
+        #ifdef DEBUG
         std::cout << "Frame sent\n";
+        #endif
     }
 
     struct can_frame recv_frame;
@@ -91,7 +104,9 @@ int Steadywin::mod_config(int confid, int32_t data)
     while (true) {
         if (can->receiveFrame(recv_frame)) {
             retval  = recv_frame.data[3];
+            #ifdef DEBUG
             std::cout << "Return value: " << retval << "\n";
+            #endif
             break;
         }
     }
@@ -114,7 +129,9 @@ int Steadywin::retr_config(uint8_t confid, int32_t& data)
     frame.data[7] = 0x00;
 
     if (can->sendFrame(frame)) {
+        #ifdef DEBUG
         std::cout << "Frame sent\n";
+        #endif
     }
 
     struct can_frame recv_frame;
@@ -123,7 +140,9 @@ int Steadywin::retr_config(uint8_t confid, int32_t& data)
     while (true) {
         if (can->receiveFrame(recv_frame)) {
             retval  = recv_frame.data[3];
+            #ifdef DEBUG
             std::cout << "Return value: " << retval << "\n";
+            #endif
             break;
         }
     }
@@ -161,7 +180,9 @@ float Steadywin::get_torq_const()
     frame.data[7] = 0x00;
 
     if (can->sendFrame(frame)) {
+        #ifdef DEBUG
         std::cout << "Frame sent\n";
+        #endif
     }
 
     struct can_frame recv_frame;
@@ -170,7 +191,9 @@ float Steadywin::get_torq_const()
     while (true) {
         if (can->receiveFrame(recv_frame)) {
             retval  = recv_frame.data[3];
+            #ifdef DEBUG
             std::cout << "Return value: " << retval << "\n";
+            #endif
             break;
         }
     }
@@ -202,7 +225,9 @@ int Steadywin::start_motor()
     frame.data[7] = 0x00;
 
     if (can->sendFrame(frame)) {
+        #ifdef DEBUG
         std::cout << "Frame sent\n";
+        #endif
     }
 
     struct can_frame recv_frame;
@@ -211,7 +236,9 @@ int Steadywin::start_motor()
     while (true) {
         if (can->receiveFrame(recv_frame)) {
             retval  = recv_frame.data[1];
+            #ifdef DEBUG
             std::cout << "Return value: " << retval << "\n";
+            #endif
             break;
         }
     }
@@ -235,7 +262,9 @@ int Steadywin::stop_motor()
     frame.data[7] = 0x00;
 
     if (can->sendFrame(frame)) {
+        #ifdef DEBUG
         std::cout << "Frame sent\n";
+        #endif
     }
 
     struct can_frame recv_frame;
@@ -244,7 +273,9 @@ int Steadywin::stop_motor()
     while (true) {
         if (can->receiveFrame(recv_frame)) {
             retval  = recv_frame.data[1];
+            #ifdef DEBUG
             std::cout << "Return value: " << retval << "\n";
+            #endif
             break;
         }
     }
@@ -277,7 +308,9 @@ int Steadywin::torque_control(float _torque, uint32_t duration)
     
 
     if (can->sendFrame(frame)) {
+        #ifdef DEBUG
         std::cout << "Frame sent\n";
+        #endif
     }
 
     struct can_frame recv_frame;
@@ -286,7 +319,9 @@ int Steadywin::torque_control(float _torque, uint32_t duration)
     while (true) {
         if (can->receiveFrame(recv_frame)) {
             retval  = recv_frame.data[1];
+            #ifdef DEBUG
             std::cout << "Return value: " << retval << "\n";
+            #endif
             break;
         }
     }
@@ -335,7 +370,9 @@ int Steadywin::speed_control(float _speed, uint32_t duration)
     
 
     if (can->sendFrame(frame)) {
+        #ifdef DEBUG
         std::cout << "Frame sent\n";
+        #endif
     }
 
     struct can_frame recv_frame;
@@ -344,7 +381,9 @@ int Steadywin::speed_control(float _speed, uint32_t duration)
     while (true) {
         if (can->receiveFrame(recv_frame)) {
             retval  = recv_frame.data[1];
+            #ifdef DEBUG
             std::cout << "Return value: " << retval << "\n";
+            #endif
             break;
         }
     }
@@ -395,7 +434,9 @@ int Steadywin::pos_control(float _pos, uint32_t duration)
     
 
     if (can->sendFrame(frame)) {
+        #ifdef DEBUG
         std::cout << "Frame sent\n";
+        #endif
     }
 
     struct can_frame recv_frame;
@@ -404,7 +445,9 @@ int Steadywin::pos_control(float _pos, uint32_t duration)
     while (true) {
         if (can->receiveFrame(recv_frame)) {
             retval  = recv_frame.data[1];
+            #ifdef DEBUG
             std::cout << "Return value: " << retval << "\n";
+            #endif
             break;
         }
     }
@@ -416,10 +459,12 @@ int Steadywin::pos_control(float _pos, uint32_t duration)
     pos_int = pos_int - 44276;
     //pos = ((pos_int * 25.0f / 65535.0f) - 12.5f) - 4.38563f;
     pos = pos_int * 25.0f / 65535.0f;
+    
+    #ifdef DEBUG
     std::cout << "pos_int: " << pos_int << "\n";
     std::cout << "pos (RAD): " << pos << "\n";
     std::cout << "pos (DEG): " << (pos * 180.0f / 3.1415926f) << "\n";
-
+    #endif
 
     int32_t speed_int = (recv_frame.data[5] << 4)
                     +  ((recv_frame.data[6] & 0xf0) >> 4);
@@ -461,7 +506,9 @@ int Steadywin::stop_control()
     frame.data[7] = 0x00;
 
     if (can->sendFrame(frame)) {
+        #ifdef DEBUG
         std::cout << "Frame sent\n";
+        #endif
     }
 
     struct can_frame recv_frame;
@@ -470,7 +517,9 @@ int Steadywin::stop_control()
     while (true) {
         if (can->receiveFrame(recv_frame)) {
             retval  = recv_frame.data[1];
+            #ifdef DEBUG
             std::cout << "Return value: " << retval << "\n";
+            #endif
             break;
         }
     }
@@ -497,7 +546,9 @@ float Steadywin::get_position()
     frame.data[7] = 0x00;
 
     if (can->sendFrame(frame)) {
+        #ifdef DEBUG
         std::cout << "Frame sent\n";
+        #endif
     }
 
     struct can_frame recv_frame;
@@ -506,7 +557,9 @@ float Steadywin::get_position()
     while (true) {
         if (can->receiveFrame(recv_frame)) {
             retval  = recv_frame.data[2];
+            #ifdef DEBUG
             std::cout << "Return value: " << retval << "\n";
+            #endif
             break;
         }
     }
@@ -538,7 +591,9 @@ int Steadywin::mod_param(int param_id, uint32_t value)
     frame.data[7] = val.u8[3];
 
     if (can->sendFrame(frame)) {
+        #ifdef DEBUG
         std::cout << "Frame sent\n";
+        #endif
     }
 
     struct can_frame recv_frame;
@@ -547,7 +602,9 @@ int Steadywin::mod_param(int param_id, uint32_t value)
     while (true) {
         if (can->receiveFrame(recv_frame)) {
             retval  = recv_frame.data[2];
+            #ifdef DEBUG
             std::cout << "Return value: " << retval << "\n";
+            #endif
             break;
         }
     }
@@ -570,7 +627,9 @@ int Steadywin::retr_param(int param_id, uint32_t& value)
     frame.data[7] = 0x00;
 
     if (can->sendFrame(frame)) {
+        #ifdef DEBUG
         std::cout << "Frame sent\n";
+        #endif
     }
 
     struct can_frame recv_frame;
@@ -579,7 +638,9 @@ int Steadywin::retr_param(int param_id, uint32_t& value)
     while (true) {
         if (can->receiveFrame(recv_frame)) {
             retval  = recv_frame.data[2];
+            #ifdef DEBUG
             std::cout << "Return value: " << retval << "\n";
+            #endif
             break;
         }
     }
@@ -611,7 +672,9 @@ int Steadywin::get_version()
     frame.data[7] = 0x00;
 
     if (can->sendFrame(frame)) {
+        #ifdef DEBUG
         std::cout << "Frame sent\n";
+        #endif
     }
 
     struct can_frame recv_frame;
@@ -620,7 +683,9 @@ int Steadywin::get_version()
     while (true) {
         if (can->receiveFrame(recv_frame)) {
             retval  = recv_frame.data[1];
+            #ifdef DEBUG
             std::cout << "Return value: " << retval << "\n";
+            #endif
             break;
         }
     }
@@ -653,7 +718,9 @@ int Steadywin::get_fault()
     frame.data[7] = 0x00;
 
     if (can->sendFrame(frame)) {
+        #ifdef DEBUG
         std::cout << "Frame sent\n";
+        #endif
     }
 
     struct can_frame recv_frame;
@@ -663,7 +730,9 @@ int Steadywin::get_fault()
     while (true) {
         if (can->receiveFrame(recv_frame)) {
             retval  = recv_frame.data[1];
+            #ifdef DEBUG
             std::cout << "Return value: " << retval << "\n";
+            #endif
             break;
         }
     }
@@ -690,7 +759,9 @@ int Steadywin::ack_fault()
     frame.data[7] = 0x00;
 
     if (can->sendFrame(frame)) {
+        #ifdef DEBUG
         std::cout << "Frame sent\n";
+        #endif
     }
 
     struct can_frame recv_frame;
@@ -699,7 +770,9 @@ int Steadywin::ack_fault()
     while (true) {
         if (can->receiveFrame(recv_frame)) {
             retval  = recv_frame.data[1];
+            #ifdef DEBUG
             std::cout << "Return value: " << retval << "\n";
+            #endif
             break;
         }
     }
@@ -725,7 +798,9 @@ int Steadywin::retr_indicator(int ind_id, float& value)
     frame.data[7] = 0x00;
 
     if (can->sendFrame(frame)) {
+        #ifdef DEBUG
         std::cout << "Frame sent\n";
+        #endif
     }
 
     struct can_frame recv_frame;
@@ -734,7 +809,9 @@ int Steadywin::retr_indicator(int ind_id, float& value)
     while (true) {
         if (can->receiveFrame(recv_frame)) {
             retval  = recv_frame.data[2];
+            #ifdef DEBUG
             std::cout << "Return value: " << retval << "\n";
+            #endif
             break;
         }
     }
@@ -765,7 +842,9 @@ int Steadywin::calibrate(int calib_type)
     frame.data[7] = 0x00;
 
     if (can->sendFrame(frame)) {
+        #ifdef DEBUG
         std::cout << "Frame sent\n";
+        #endif
     }
 
     struct can_frame recv_frame;
@@ -774,7 +853,9 @@ int Steadywin::calibrate(int calib_type)
     while (true) {
         if (can->receiveFrame(recv_frame)) {
             retval  = recv_frame.data[2];
+            #ifdef DEBUG
             std::cout << "Return value: " << retval << "\n";
+            #endif
             break;
         }
     }
@@ -798,7 +879,9 @@ void Steadywin::update_firmware()
     frame.data[7] = 0x00;
 
     if (can->sendFrame(frame)) {
+        #ifdef DEBUG
         std::cout << "Frame sent\n";
+        #endif
     }
 
 }

@@ -134,6 +134,10 @@ public:
         //can = _can;
         id = _id;
     }
+    ~Steadywin()
+    {
+        stop_motor();
+    }
 
     float get_torq_const();
     int32_t get_gear_ratio();
@@ -163,8 +167,6 @@ public:
     void update_firmware();
 
     float get_position();
-
-    int get_fault();
 
 
 
