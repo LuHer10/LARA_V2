@@ -528,8 +528,7 @@ int Steadywin::stop_control()
     return  retval;
 }
 
-
-float Steadywin::get_position()
+float Steadywin::get_position_rad()
 {
     fl32u8 ang;
 
@@ -569,8 +568,132 @@ float Steadywin::get_position()
     ang.u8[2] = recv_frame.data[6];
     ang.u8[3] = recv_frame.data[7];
 
-    return (float)ang.fl;
-    
+    float current_angle = (float)ang.fl;
+
+    current_angle = (current_angle*180.0f/3.1415926f) + 590040.0f;
+
+    pos_ind_deg = current_angle;
+    pos_ind_rad = current_angle * 3.1415926f / 180.0f;
+
+
+    return pos_ind_rad;
+}
+
+float Steadywin::get_position_deg()
+{
+    fl32u8 ang;
+
+    struct can_frame frame;
+    frame.can_id = id;
+    frame.can_dlc = 8;
+    frame.data[0] = RETRIEVE_INDICATOR;
+    frame.data[1] = ANGLE_OUTPUT_MEC;
+    frame.data[2] = 0x00;
+    frame.data[3] = 0x00;
+    frame.data[4] = 0x00;
+    frame.data[5] = 0x00;
+    frame.data[6] = 0x00;
+    frame.data[7] = 0x00;
+
+    if (can->sendFrame(frame)) {
+        #ifdef DEBUG
+        std::cout << "Frame sent\n";
+        #endif
+    }
+
+    struct can_frame recv_frame;
+    int retval;
+
+    while (true) {
+        if (can->receiveFrame(recv_frame)) {
+            retval  = recv_frame.data[2];
+            #ifdef DEBUG
+            std::cout << "Return value: " << retval << "\n";
+            #endif
+            break;
+        }
+    }
+
+    ang.u8[0] = recv_frame.data[4];
+    ang.u8[1] = recv_frame.data[5];
+    ang.u8[2] = recv_frame.data[6];
+    ang.u8[3] = recv_frame.data[7];
+
+    float current_angle = (float)ang.fl;
+
+    current_angle = (current_angle*180.0f/3.1415926f) + 590040.0f;
+
+    pos_ind_deg = current_angle;
+    pos_ind_rad = current_angle * 3.1415926f / 180.0f;
+
+    return pos_ind_deg;
+}
+
+float Steadywin::get_speed_rpm()
+{
+    fl32u8 speed;
+
+    struct can_frame frame;
+    frame.can_id = id;
+    frame.can_dlc = 8;
+    frame.data[0] = RETRIEVE_INDICATOR;
+    frame.data[1] = OUTPUT_SPEED;
+    frame.data[2] = 0x00;
+    frame.data[3] = 0x00;
+    frame.data[4] = 0x00;
+    frame.data[5] = 0x00;
+    frame.data[6] = 0x00;
+    frame.data[7] = 0x00;
+
+    if (can->sendFrame(frame)) {
+        #ifdef DEBUG
+        std::cout << "Frame sent\n";
+        #endif
+    }
+
+    struct can_frame recv_frame;
+    int retval;
+
+    while (true) {
+        if (can->receiveFrame(recv_frame)) {
+            retval  = recv_frame.data[2];
+            #ifdef DEBUG
+            std::cout << "Return value: " << retval << "\n";
+            #endif
+            break;
+        }
+    }
+
+    speed.u8[0] = recv_frame.data[4];
+    speed.u8[1] = recv_frame.data[5];
+    speed.u8[2] = recv_frame.data[6];
+    speed.u8[3] = recv_frame.data[7];
+
+    float current_speed = (float)speed.fl;
+
+    current_speed = (current_speed*60.0f/3.1415926f) + 590040.0f;
+
+    speed_ind_rpms = current_speed;
+
+    return speed_ind_rpms;
+}
+
+float Steadywin::get_speed_rad()
+{
+    float curr_speed;
+    curr_speed = get_speed_rpm();
+    curr_speed = (curr_speed / 60.0f) * 2.0f * 3.1415926f;
+    speed_ind_rad = curr_speed;
+    return speed_ind_rad;
+}
+
+float Steadywin::get_speed_deg()
+{
+    float curr_speed;
+    curr_speed = get_speed_rpm();
+    curr_speed = (curr_speed / 60.0f) * 360.0f;
+    speed_ind_deg = curr_speed;
+    return speed_ind_deg;
 }
 
 int Steadywin::mod_param(int param_id, uint32_t value)

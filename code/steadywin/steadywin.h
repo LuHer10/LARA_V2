@@ -127,6 +127,12 @@ private:
     float torq_const;
     int32_t gear_ratio;
 
+    float pos_ind_deg;
+    float pos_ind_rad;
+    float speed_ind_rpms;
+    float speed_ind_rad;
+    float speed_ind_deg;
+
 public:
 
     Steadywin(SocketCAN* _can, int _id):can(_can)
@@ -166,10 +172,11 @@ public:
 
     void update_firmware();
 
-    float get_position();
-
-
-
+    float get_position_deg();
+    float get_position_rad();
+    float get_speed_rpm();
+    float get_speed_rad();
+    float get_speed_deg();
 
 };
 

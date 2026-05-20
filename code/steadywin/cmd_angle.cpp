@@ -9,11 +9,36 @@
 
 //float angle = 0.0f;
 
+const int delta_time = 50; // Time in milliseconds
+
 void send_position(Steadywin& m, float& ang)
 {
     while (true) {
         m.pos_control_deg(ang);
         std::this_thread::sleep_for(std::chrono::milliseconds(50));
+    }
+}
+
+void send_position_smooth(Steadywin& m, float& ang, float& rpm)
+{
+    float current_angle = m.get_position_deg(); // Get the current position in degrees
+    float step = (rpm / 60.0f) * (delta_time / 1000.0f);  // Adjust the step size as needed
+
+    while (true) { // Loop until the target angle is reached
+        if(abs(ang - current_angle) > 2*step)
+        {
+            if(ang > current_angle) {
+                current_angle += step; // Increment the angle
+            } else {
+                current_angle -= step; // Decrement the angle
+            }
+            m.pos_control_deg(current_angle);
+        }
+        else {
+            m.pos_control_deg(ang); // Set to target angle if close enough
+        }        
+        std::this_thread::sleep_for(std::chrono::milliseconds(delta_time));
+        //current_angle = m.get_position_deg(); // Get the current position in degrees
     }
 }
 
