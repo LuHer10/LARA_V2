@@ -13,7 +13,7 @@ void send_position_deg(Steadywin& m, float& ang)
 {
     while (true) {
         m.pos_control_deg(ang);
-        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
 }
 
