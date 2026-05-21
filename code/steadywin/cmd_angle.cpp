@@ -46,16 +46,16 @@ void send_position_deg_smooth(Steadywin& m, float& ang, float& step_size/* deg/s
 
 void send_position_rad_smooth(Steadywin& m, float& ang, float& step_size/* rad/s */)
 {
-    float degs = ang*180.0f/3.1415926f;
-    float rad_steps = step_size*180.0f/3.1415926f;
+    float degs = ang*180.0f/M_PI;
+    float rad_steps = step_size*180.0f/M_PI;
 
     const int delta_time = 100; // Time in milliseconds
     float current_angle = m.get_position_deg(); // Get the current position in degrees
     float step = rad_steps * ((float)delta_time/1000.0f);//(rpm / 60.0f) * (delta_time / 1000.0f);  // Adjust the step size as needed
 
     while (true) { // Loop until the target angle is reached
-        degs = ang*180.0f/3.1415926f;
-        rad_steps = step_size*180.0f/3.1415926f;
+        degs = ang*180.0f/M_PI;
+        rad_steps = step_size*180.0f/M_PI;
         if(abs(degs - current_angle) > 1*step)
         {
             if(degs > current_angle) {
@@ -96,7 +96,7 @@ int main() {
     scanf("%f", &angle);
         
     float deg_vel = 90.0f;
-    float rad_vel = deg_vel*3.1415926f/180.0f;
+    float rad_vel = deg_vel*M_PI/180.0f;
     //std::thread pos_thread(send_position, std::ref(m1), std::ref(angle));
     std::thread pos_thread(send_position_deg_smooth, std::ref(m1), std::ref(angle), std::ref(deg_vel));
     //std::thread pos_thread(send_position_rad_smooth, std::ref(m1), std::ref(angle), std::ref(rad_vel));

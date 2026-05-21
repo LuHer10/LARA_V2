@@ -412,7 +412,7 @@ int Steadywin::pos_control_rad(float _pos, uint32_t duration)
 {
 
     fl32u8 ang;
-    ang.fl = _pos - (79.7f*3.1415926f/180.0f); 
+    ang.fl = _pos - (79.7f*M_PI/180.0f); 
     u32u8 dur;
     dur.u32  = duration;
 
@@ -463,7 +463,7 @@ int Steadywin::pos_control_rad(float _pos, uint32_t duration)
     #ifdef DEBUG
     std::cout << "pos_int: " << pos_int << "\n";
     std::cout << "pos (RAD): " << pos << "\n";
-    std::cout << "pos (DEG): " << (pos * 180.0f / 3.1415926f) << "\n";
+    std::cout << "pos (DEG): " << (pos * 180.0f / M_PI) << "\n";
     #endif
 
     int32_t speed_int = (recv_frame.data[5] << 4)
@@ -484,7 +484,7 @@ int Steadywin::pos_control_deg(float _pos, uint32_t duration)
 {
 
     float ang;
-    ang = _pos * 3.1415926f / 180.0f; // Convert degrees to radians
+    ang = _pos * M_PI / 180.0f; // Convert degrees to radians
 
     int retval = pos_control_rad(ang, duration);
     return  retval;
@@ -570,10 +570,10 @@ float Steadywin::get_position_rad()
 
     float current_angle = (float)ang.fl;
 
-    current_angle = (current_angle*180.0f/3.1415926f) + 590040.0f;
+    current_angle = (current_angle*180.0f/M_PI) + 590040.0f;
 
     pos_ind_deg = current_angle;
-    pos_ind_rad = current_angle * 3.1415926f / 180.0f;
+    pos_ind_rad = current_angle * M_PI / 180.0f;
 
 
     return pos_ind_rad;
@@ -621,10 +621,10 @@ float Steadywin::get_position_deg()
 
     float current_angle = (float)ang.fl;
 
-    current_angle = (current_angle*180.0f/3.1415926f) + 590040.0f;
+    current_angle = (current_angle*180.0f/M_PI) + 590040.0f;
 
     pos_ind_deg = current_angle;
-    pos_ind_rad = current_angle * 3.1415926f / 180.0f;
+    pos_ind_rad = current_angle * M_PI / 180.0f;
 
     return pos_ind_deg;
 }
@@ -671,7 +671,7 @@ float Steadywin::get_speed_rpm()
 
     float current_speed = (float)speed.fl;
 
-    current_speed = (current_speed*60.0f/3.1415926f) + 590040.0f;
+    current_speed = (current_speed*60.0f/M_PI) + 590040.0f;
 
     speed_ind_rpms = current_speed;
 
@@ -682,7 +682,7 @@ float Steadywin::get_speed_rad()
 {
     float curr_speed;
     curr_speed = get_speed_rpm();
-    curr_speed = (curr_speed / 60.0f) * 2.0f * 3.1415926f;
+    curr_speed = (curr_speed / 60.0f) * 2.0f * M_PI;
     speed_ind_rad = curr_speed;
     return speed_ind_rad;
 }
