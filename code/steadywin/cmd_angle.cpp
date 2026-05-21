@@ -17,7 +17,7 @@ void send_position_deg(Steadywin& m, float& ang)
     }
 }
 
-void send_position_deg_smooth(Steadywin& m, float& ang, float step_size/* deg/s */)
+void send_position_deg_smooth(Steadywin& m, float& ang, float& step_size/* deg/s */)
 {
     const int delta_time = 100; // Time in milliseconds
     float current_angle = m.get_position_deg(); // Get the current position in degrees
@@ -36,7 +36,9 @@ void send_position_deg_smooth(Steadywin& m, float& ang, float step_size/* deg/s 
         else {
             m.pos_control_deg(ang); // Set to target angle if close enough
             current_angle = m.get_position_deg();
-        }        
+        }
+        //current_angle = m.get_position_deg();
+
         std::this_thread::sleep_for(std::chrono::milliseconds(delta_time));
         //current_angle = m.get_position_deg(); // Get the current position in degrees
     }
@@ -92,8 +94,9 @@ int main() {
     printf("Target Angle: ");
     scanf("%f", &angle);
         
+    float ang_vel = 90.0f;
     //std::thread pos_thread(send_position, std::ref(m1), std::ref(angle));
-    std::thread pos_thread(send_position_deg_smooth, std::ref(m1), std::ref(angle), 90.0f);
+    std::thread pos_thread(send_position_deg_smooth, std::ref(m1), std::ref(angle), std::ref(ang_vel));
     //std::thread pos_thread(send_position_rad_smooth, std::ref(m1), std::ref(angle), 3.1415926f*0.5f);
 
     while (true) {
