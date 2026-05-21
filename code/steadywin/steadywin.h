@@ -157,7 +157,7 @@ public:
     int stop_motor();
     int torque_control(float _torque, uint32_t duration = 0);
     int speed_control(float _speed, uint32_t duration = 0);
-    int pos_control(float _pos, uint32_t duration = 0);
+    int pos_control_rad(float _pos, uint32_t duration = 0);
     int pos_control_deg(float _pos, uint32_t duration = 0);
     int stop_control();
 

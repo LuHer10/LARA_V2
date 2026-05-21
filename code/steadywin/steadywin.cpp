@@ -408,7 +408,7 @@ int Steadywin::speed_control(float _speed, uint32_t duration)
     
 }
 
-int Steadywin::pos_control(float _pos, uint32_t duration)
+int Steadywin::pos_control_rad(float _pos, uint32_t duration)
 {
 
     fl32u8 ang;
@@ -486,7 +486,7 @@ int Steadywin::pos_control_deg(float _pos, uint32_t duration)
     float ang;
     ang = _pos * 3.1415926f / 180.0f; // Convert degrees to radians
 
-    int retval = pos_control(ang, duration);
+    int retval = pos_control_rad(ang, duration);
     return  retval;
     
 }
