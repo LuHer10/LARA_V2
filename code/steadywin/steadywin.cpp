@@ -1008,3 +1008,63 @@ void Steadywin::update_firmware()
     }
 
 }
+
+void Steadywin::move_smooth_deg(float& ang, float& step_size)
+{
+    const int delta_time = 100; // Time in milliseconds
+    float current_angle = get_position_deg(); // Get the current position in degrees
+    float step = step_size * ((float)delta_time/1000.0f);//(rpm / 60.0f) * (delta_time / 1000.0f);  // Adjust the step size as needed
+
+    while (true) { // Loop until the target angle is reached
+        if(abs(ang - current_angle) > 1*step)
+        {
+            if(ang > current_angle) {
+                current_angle += step; // Increment the angle
+            } else {
+                current_angle -= step; // Decrement the angle
+            }
+            pos_control_deg(current_angle);
+        }
+        else {
+            pos_control_deg(ang); // Set to target angle if close enough
+            current_angle = get_position_deg();
+        }
+        //current_angle = m.get_position_deg();
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(delta_time));
+        //current_angle = m.get_position_deg(); // Get the current position in degrees
+    }
+}
+
+void Steadywin::move_smooth_rad(float& ang, float& step_size)
+{
+    float degs = ang*180.0f/M_PI;
+    float rad_steps = step_size*180.0f/M_PI;
+
+    const int delta_time = 100; // Time in milliseconds
+    float current_angle = get_position_deg(); // Get the current position in degrees
+    float step = step_size * ((float)delta_time/1000.0f);//(rpm / 60.0f) * (delta_time / 1000.0f);  // Adjust the step size as needed
+
+    while (true) { // Loop until the target angle is reached
+        degs = ang*180.0f/M_PI;
+        rad_steps = step_size*180.0f/M_PI;
+        if(abs(degs - current_angle) > 1*step)
+        {
+            if(degs > current_angle) {
+                current_angle += step; // Increment the angle
+            } else {
+                current_angle -= step; // Decrement the angle
+            }
+            pos_control_deg(current_angle);
+        }
+        else {
+            pos_control_deg(degs); // Set to target angle if close enough
+            current_angle = get_position_deg();
+        }
+        //current_angle = m.get_position_deg();
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(delta_time));
+        //current_angle = m.get_position_deg(); // Get the current position in degrees
+    }
+}
+

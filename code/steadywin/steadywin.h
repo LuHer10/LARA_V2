@@ -1,8 +1,11 @@
 #include "socketcan.h"
 #include <stdint.h>
 #include <iostream>
+#include <thread>
+#include <chrono>
+#include <math.h>
 
-#define M_PI 3.1415926536f
+//#define M_PI 3.1415926536f
 
 typedef enum
 {
@@ -134,12 +137,15 @@ private:
     float speed_ind_rad;
     float speed_ind_deg;
 
+    int turn = 0;
+
 public:
 
     Steadywin(SocketCAN* _can, int _id):can(_can)
     {
         //can = _can;
         id = _id;
+        turn = get_position_deg()/360.0f;
     }
     ~Steadywin()
     {
@@ -178,6 +184,9 @@ public:
     float get_speed_rpm();
     float get_speed_rad();
     float get_speed_deg();
+
+    void move_smooth_deg(float& ang, float& step_size); //Use only in a thread, as it is a blocking function that will continuously update the position until the target angle is reached. Step size is in deg/s.
+    void move_smooth_rad(float& ang, float& step_size); //Use only in a thread, as it is a blocking function that will continuously update the position until the target angle is reached. Step size is in rad/s.
 
 };
 
