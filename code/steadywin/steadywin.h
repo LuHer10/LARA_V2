@@ -2,10 +2,16 @@
 #include <stdint.h>
 #include <iostream>
 #include <thread>
+#include <mutex>
 #include <chrono>
 #include <math.h>
 
+#ifndef STEADYWIN_H
+#define STEADYWIN_H
+
 //#define M_PI 3.1415926536f
+
+inline std::mutex stw_mtx;
 
 typedef enum
 {
@@ -190,3 +196,4 @@ public:
 
 };
 
+#endif

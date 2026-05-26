@@ -1012,7 +1012,9 @@ void Steadywin::update_firmware()
 void Steadywin::move_smooth_deg(float& ang, float& step_size)
 {
     const int delta_time = 100; // Time in milliseconds
+    stw_mtx.lock();
     float current_angle = get_position_deg(); // Get the current position in degrees
+    stw_mtx.unlock();
     float step = step_size * ((float)delta_time/1000.0f);//(rpm / 60.0f) * (delta_time / 1000.0f);  // Adjust the step size as needed
 
     while (true) { // Loop until the target angle is reached
@@ -1023,11 +1025,15 @@ void Steadywin::move_smooth_deg(float& ang, float& step_size)
             } else {
                 current_angle -= step; // Decrement the angle
             }
+            stw_mtx.lock();
             pos_control_deg(current_angle);
+            stw_mtx.unlock();
         }
         else {
+            stw_mtx.lock();
             pos_control_deg(ang); // Set to target angle if close enough
             current_angle = get_position_deg();
+            stw_mtx.unlock();
         }
         //current_angle = m.get_position_deg();
 
@@ -1042,7 +1048,9 @@ void Steadywin::move_smooth_rad(float& ang, float& step_size)
     float rad_steps = step_size*180.0f/M_PI;
 
     const int delta_time = 100; // Time in milliseconds
+    stw_mtx.lock();
     float current_angle = get_position_deg(); // Get the current position in degrees
+    stw_mtx.unlock();
     float step = step_size * ((float)delta_time/1000.0f);//(rpm / 60.0f) * (delta_time / 1000.0f);  // Adjust the step size as needed
 
     while (true) { // Loop until the target angle is reached
@@ -1055,11 +1063,15 @@ void Steadywin::move_smooth_rad(float& ang, float& step_size)
             } else {
                 current_angle -= step; // Decrement the angle
             }
+            stw_mtx.lock();
             pos_control_deg(current_angle);
+            stw_mtx.unlock();
         }
         else {
+            stw_mtx.lock();
             pos_control_deg(degs); // Set to target angle if close enough
             current_angle = get_position_deg();
+            stw_mtx.unlock();
         }
         //current_angle = m.get_position_deg();
 
