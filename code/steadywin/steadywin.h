@@ -9,9 +9,20 @@
 #ifndef STEADYWIN_H
 #define STEADYWIN_H
 
+#define DEBUG
+
 //#define M_PI 3.1415926536f
 
 inline std::mutex stw_mtx;
+
+#define GIM3505_8 0
+#define GIM4310_36 1
+
+#define GIM3505_8_OFFSET -44276
+#define GIM4310_36_OFFSET -20553
+
+#define GIM3505_8_APP_OFFSET -79.7f
+#define GIM4310_36_APP_OFFSET -266.8f
 
 typedef enum
 {
@@ -129,6 +140,7 @@ class Steadywin
 private:
     SocketCAN* can;
     int id;
+    int motor_type;
 
     int8_t temp;
     float pos;
@@ -147,10 +159,11 @@ private:
 
 public:
 
-    Steadywin(SocketCAN* _can, int _id):can(_can)
+    Steadywin(SocketCAN* _can, int _id, int _motor_type):can(_can)
     {
         //can = _can;
         id = _id;
+        motor_type = _motor_type;
         turn = get_position_deg()/360.0f;
     }
     ~Steadywin()

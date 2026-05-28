@@ -19,7 +19,7 @@ int main() {
 
     //SocketCAN *pcan = &can;
 
-    /*float rpms = 120.0f;
+    float rpms = 120.0f;
     uint8_t* rpms_int;
     rpms_int = (uint8_t*)(&rpms);
     
@@ -31,11 +31,11 @@ int main() {
 
     float position;
     fl32u8 pos;
-    pos.fl = 3.14f*0.0f;
-    
+    pos.fl = 3.14f*1.0f;
+    struct can_frame recv_frame;
     while (true) {
     struct can_frame frame;
-    frame.can_id = 0x01;
+    frame.can_id = 0x02;
     frame.can_dlc = 8;
     frame.data[0] = 0x92;
     frame.data[1] = pos.u8[0];
@@ -50,7 +50,7 @@ int main() {
         std::cout << "Frame sent\n";
     }
 
-    struct can_frame recv_frame;
+    
 
         while (true) {
             if (can.receiveFrame(recv_frame)) {
@@ -64,6 +64,22 @@ int main() {
         }
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
         pos.fl += 3.1415926f/8.0f;
+
+    pos.u8[0] = recv_frame.data[4];
+    pos.u8[1] = recv_frame.data[5];
+    pos.u8[2] = recv_frame.data[6];
+    pos.u8[3] = recv_frame.data[7];
+    position = pos.fl;
+    std::cout << "Position: " << position << "\n";
+
+    
+    int32_t result;
+    result = ((int32_t)recv_frame.data[7] << 24)
+            + ((int32_t)recv_frame.data[6] << 16)
+            + ((int32_t)recv_frame.data[5] << 8)
+            + ((int32_t)recv_frame.data[4]);
+    std::cout << "Result: " << (int)result << "\n";
+
     }
 
     pos.u8[0] = recv_frame.data[4];
@@ -80,9 +96,9 @@ int main() {
             + ((int32_t)recv_frame.data[5] << 8)
             + ((int32_t)recv_frame.data[4]);
     std::cout << "Result: " << (int)result << "\n";
-    */
     
     
+    /*
     int32_t data;// = 10;
     int retval;
 
@@ -136,7 +152,7 @@ int main() {
     //m1.get_fault();
     //retval = m1.stop_motor();
     //printf("%d\n", retval);
-   
+   */
 
     return 0;
 }

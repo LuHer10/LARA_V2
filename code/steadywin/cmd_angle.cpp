@@ -15,10 +15,10 @@ std::mutex mtx;
 void send_position_deg(Steadywin& m, float& ang)
 {
     while (true) {
-        mtx.lock();
-        m.pos_control_deg(ang);
-        mtx.unlock();
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        //mtx.lock();
+        m.pos_control_deg(ang, 500);
+        //mtx.unlock();
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
     }
 }
 
@@ -92,7 +92,6 @@ void send_position_rad_smooth(Steadywin& m, float& ang, float& step_size/* rad/s
 }
 
 
-
 int main() {
     SocketCAN can("can0");
 
@@ -103,32 +102,32 @@ int main() {
 
     can.setNonBlocking(true);
 
-    Steadywin m1(&can, 0x01);
+    Steadywin m1(&can, 0x02, GIM4310_36);
 
 
     m1.start_motor();
     float angle = 0.0f;
 
-    printf("Target Angle: ");
-    scanf("%f", &angle);
+    //printf("Target Angle: ");
+    //scanf("%f", &angle);
         
     float deg_vel = 90.0f;
     float rad_vel = deg_vel*M_PI/180.0f;
     //std::thread pos_thread(send_position_deg, std::ref(m1), std::ref(angle));
     //std::thread pos_thread(send_position_deg_smooth, std::ref(m1), std::ref(angle), std::ref(deg_vel));
     //std::thread pos_thread(send_position_rad_smooth, std::ref(m1), std::ref(angle), std::ref(rad_vel));
-    std::thread pos_thread(&Steadywin::move_smooth_deg, &m1, std::ref(angle), std::ref(deg_vel));
+    //std::thread pos_thread(&Steadywin::move_smooth_deg, &m1, std::ref(angle), std::ref(deg_vel));
 
     while (true) {
         printf("Target Angle: ");
         scanf("%f", &angle);
         //m1.start_motor();
-        //m1.pos_control_deg(angle);
-        //std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        m1.pos_control_deg(angle);
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
         //m1.stop_motor();
     }
 
-    pos_thread.join();
+    //pos_thread.join();
     m1.stop_motor();
 
     return 0;

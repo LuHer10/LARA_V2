@@ -412,9 +412,23 @@ int Steadywin::pos_control_rad(float _pos, uint32_t duration)
 {
 
     fl32u8 ang;
-    ang.fl = _pos - (79.7f*M_PI/180.0f); 
+    if(motor_type == GIM3505_8)
+        ang.fl = _pos + (GIM3505_8_APP_OFFSET*M_PI/180.0f); 
+    else if(motor_type == GIM4310_36)
+        ang.fl = _pos + (GIM4310_36_APP_OFFSET*M_PI/180.0f);
+    
+     
     u32u8 dur;
-    dur.u32  = duration;
+
+    if(duration != 0)
+        dur.u32 = duration;
+    else
+        if(motor_type == GIM3505_8)
+            dur.u32 = 0;
+        else if(motor_type == GIM4310_36)
+            dur.u32 = 50;
+
+    //dur.u32  = duration;
 
     //std::cout << std::hex << (int)ang.u8[0] << " " << (int)ang.u8[1] << " " << (int)ang.u8[2] << " " << (int)ang.u8[3] << "\n";
     //std::cout << (float)ang.fl << "\n";
@@ -456,9 +470,19 @@ int Steadywin::pos_control_rad(float _pos, uint32_t duration)
 
     int32_t pos_int = recv_frame.data[3]
                     + (recv_frame.data[4] << 8);
-    pos_int = pos_int - 44276;
-    //pos = ((pos_int * 25.0f / 65535.0f) - 12.5f) - 4.38563f;
-    pos = pos_int * 25.0f / 65535.0f;
+
+    if(motor_type == GIM3505_8)
+    {
+        pos_int = pos_int + GIM3505_8_OFFSET;
+        pos = pos_int * 25.0f / 65535.0f;
+    }
+    else if(motor_type == GIM4310_36)
+    {
+        pos_int = pos_int + GIM4310_36_OFFSET;
+        pos = pos_int * 25.0f / 65535.0f;
+    }
+    
+    //pos = ((pos_int * 25.0f / 65535.0f) - 12.5f); //- 4.38563f;
     
     #ifdef DEBUG
     std::cout << "pos_int: " << pos_int << "\n";
