@@ -7,6 +7,10 @@
 First flash the latest Raspberry Pi OS image to your preferred storage device.
 The official Raspberry Pi Imager can be used for that.
 
+Then perform an update
+```bash
+sudo apt update
+```
 ### Step 2: Configure the CAN Hat
 
 Add the following lines to /boot/firmware/config.txt
@@ -20,12 +24,21 @@ Reboot
 sudo reboot
 ```
 
-See if  initialization was successful
+See if initialization was successful
 ```bash
 dmesg | grep -i '\(can\|spi\)'
 ```
 
-Bring up the CAN interface (example: 500000 baud)
+Activate the CAN interface (example: 500000 baud)
+```bash
+sudo ip link set can0 up type can bitrate 500000
+sudo ifconfig can0 txqueuelen 65536
+sudo ifconfig can0 up
+```
+
+Optional: Activate CAN interface on boot
+
+Add the following to ~/.bashrc
 ```bash
 sudo ip link set can0 up type can bitrate 500000
 sudo ifconfig can0 txqueuelen 65536
