@@ -28,6 +28,11 @@ See if initialization was successful
 ```bash
 dmesg | grep -i '\(can\|spi\)'
 ```
+It should output something like this:
+```bash
+[   20.892310] CAN device driver interface
+[   20.915484] mcp251x spi0.0 can0: MCP2515 successfully initialized
+```
 
 Activate the CAN interface (example: 500000 baud)
 ```bash
