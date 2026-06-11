@@ -9,6 +9,37 @@
 #include <chrono>
 #include <math.h>
 
+
+union fl32u8
+{
+    float fl;
+    uint8_t u8[4];
+};
+
+union fl32i8
+{
+    float fl;
+    int8_t i8[4];
+};
+
+union u32u8
+{
+    uint32_t u32;
+    uint8_t u8[4];
+};
+
+union i32i8
+{
+    int32_t i32;
+    int8_t i8[4];
+};  
+
+union i32u8
+{
+    int32_t i32;
+    uint8_t u8[4];
+};
+
     typedef enum {
         MW_HEARTBEAT_CMD = 0x001,                   //!<@brief 电机心跳周期数据
         MW_ESTOP_CMD = 0x002,                   //!<@brief 紧急停止
@@ -43,6 +74,23 @@
     } MW_CMD_ID;
 
     typedef enum {
+        MW_VOLTAGE_CTRL = 0x00,                   //!<@brief 电压控制
+        MW_TORQUE_CTRL = 0x01,                   //!<@brief 力矩控制
+        MW_VEL_CTRL = 0x02,                   //!<@brief 速度控制
+        MW_POS_CTRL = 0x03                   //!<@brief 位置控制
+    } MW_CTRL_MODES;
+
+    typedef enum {
+        MW_INACTIVE = 0x00,                   //!<@brief 无输入
+        MW_DIRECT = 0x01,                   //!<@brief 直接输入
+        MW_VEL_RAMP = 0x02,                   //!<@brief 速度斜坡
+        MW_POS_FILTER = 0x03,                   //!<@brief 位置滤波
+        MW_TRAPEZODIAL = 0x05,                   //!<@brief 斜坡轨迹
+        MW_TORQ_RAMP = 0x06,                    //!<@brief 力矩斜坡
+        MW_MIT = 0x09                    //!<@brief MIT控制
+    } MW_INPUT_MODES;
+
+    typedef enum {
         MW_AXIS_STATE_UNDEFINED = 0x0,    
         MW_AXIS_STATE_IDLE = 0x1,   
         MW_AXIS_STATE_STARTUP_SEQUENCE = 0x2,    
@@ -57,7 +105,7 @@
         MW_AXIS_STATE_ENCODER_HALL_POLARITY_CALIBRATION = 0xC,   
         MW_AXIS_STATE_ENCODER_HALL_PHASE_CALIBRATION = 0XD,    
         MW_AXIS_STATE_ANTICOGGING_CALIBRATION = 0XE   
-    } MW_MOTER_STATE;
+    } MW_MOTOR_STATE;
 
 
 class GIM6010
@@ -75,8 +123,17 @@ public:
         id = _id;
     }
 
-    void setAxisState(MW_MOTER_STATE state);
-    void MITControl(float pos, float vel, float torq);
+    void setAxisState(uint8_t state);
+    void setControllerMode(uint8_t control_mode, uint8_t input_mode);
+
+    void setTrapezodialMode();
+    void setMITMode();
+
+    void pos_control_rev(float revs, int16_t vel = 0, int16_t torq = 0);
+    void vel_control(float vel);
+    void torq_control(float torq);
+
+    void MITControl(float pos, float vel, float torq, float kp, float kd);
 
     void start_motor();
     void stop_motor();
