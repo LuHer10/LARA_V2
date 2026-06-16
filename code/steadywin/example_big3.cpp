@@ -21,7 +21,7 @@ void enc_thread(GIM6010& m) {
     float pos, vel;
     while (true) {
         m.getEncoderEstimates(pos, vel);
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
 }
 
@@ -44,21 +44,17 @@ int main() {
     m1.start_motor();
     //std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
-    m1.setMITMode();
+    m1.setTrapezodialMode();
     //std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
     std::thread encoder_thread(enc_thread, std::ref(m1));
 
-    m1.getEncoderEstimates(pos, vel);
-
-    m1.MITControl(2.0f*M_PI, 5.0f, 0.0f, kp, kd);
-
+    m1.pos_control_rev(48.0f);
     std::this_thread::sleep_for(std::chrono::milliseconds(4000));
 
 
   //  m1.getEncoderEstimates(pos, vel);
-
-    m1.MITControl(0.0f, 5.0f, 0.0f, kp, kd);
+    m1.pos_control_rev(0.0f);
     std::this_thread::sleep_for(std::chrono::milliseconds(4000));
 
 
