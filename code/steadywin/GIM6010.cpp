@@ -73,10 +73,10 @@ void GIM6010::pos_control_rev(float revs, int16_t vel, int16_t torq)
     frame.data[1] = _revs.u8[1];
     frame.data[2] = _revs.u8[2];
     frame.data[3] = _revs.u8[3];
-    frame.data[4] = 0x00;
-    frame.data[5] = 0x00;
-    frame.data[6] = 0x00;
-    frame.data[7] = 0x00;
+    frame.data[4] = _vel.u8[0];
+    frame.data[5] = _vel.u8[1];
+    frame.data[6] = _torq.u8[0];
+    frame.data[7] = _torq.u8[1];
 
     if (can->sendFrame(frame)) {
         #ifdef DEBUG
@@ -111,6 +111,22 @@ void GIM6010::MITControl(float pos, float vel, float torq, float kp, float kd)
         std::cout << "Frame sent\n";
         #endif
     }
+
+    struct can_frame recv_frame;
+
+    while (true) {
+        if (can->receiveFrame(recv_frame)) {
+            break;
+        }
+    }
+
+    float pos_out = ((float)(recv_frame.data[1] << 8 | recv_frame.data[2]) * 25.0f / 65535) - 12.5f;
+    float vel_out = ((float)(recv_frame.data[3] << 4 | recv_frame.data[4] >> 4) * 130.0f / 4095.0f) - 65.0f;
+    float torq_out = ((float)(((recv_frame.data[4] & 0xF) << 8) | recv_frame.data[5]) * 100.0f / 4095.0f) - 50.0f;
+    
+    this->pos = pos_out;
+    this->vel = vel_out;
+    this->torq = torq_out;
 }
 
 void GIM6010::start_motor()
@@ -123,4 +139,48 @@ void GIM6010::stop_motor()
 {
     // Implementation for stopping the motor
     setAxisState(MW_AXIS_STATE_IDLE);
+}
+
+void GIM6010::getEncoderEstimates(float& _pos, float& _vel)
+{
+    // Implementation for getting encoder estimates
+
+    struct can_frame frame;
+    frame.can_id = (id << 5) | MW_GET_ENCODER_ESTIMATES_CMD;
+    frame.can_dlc = 8;
+    frame.data[0] = 0x00;
+    frame.data[1] = 0x00;
+    frame.data[2] = 0x00;
+    frame.data[3] = 0x00;
+    frame.data[4] = 0x00;
+    frame.data[5] = 0x00;
+    frame.data[6] = 0x00;
+    frame.data[7] = 0x00;
+
+    if (can->sendFrame(frame)) {
+        #ifdef DEBUG
+        std::cout << "Frame sent\n";
+        #endif
+    }
+
+    // Wait for response and parse the received data to get pos and vel
+    struct can_frame recv_frame;
+
+    while (true) {
+        if (can->receiveFrame(recv_frame)) {
+            std::cout << "Received ID: " << (recv_frame.can_id >> 5) << "\n";
+            break;
+        }
+    }
+
+    //float pos_out = _pos.fl;
+    float vel_out;// = _vel.fl;
+
+    float pos_out;
+    memcpy(&pos_out, &recv_frame.data[0], sizeof(float));
+    memcpy(&vel_out, &recv_frame.data[4], sizeof(float));
+    
+    std::cout << "Position: " << pos_out << ", Velocity: " << vel_out << "\n";
+    _pos = pos_out;
+    _vel = vel_out;
 }

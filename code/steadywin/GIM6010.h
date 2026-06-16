@@ -84,10 +84,13 @@ private:
     SocketCAN* can;
     uint8_t id;
 
+    
+public:
+
     float pos;
     float vel;
     float torq;
-public:
+
     GIM6010(SocketCAN* _can, uint8_t _id):can(_can)
     {
         id = _id;
@@ -100,13 +103,15 @@ public:
     void setMITMode();
 
     void pos_control_rev(float revs, int16_t vel = 0, int16_t torq = 0);
-    void vel_control(float vel);
+    void vel_control(float vel, int16_t torq = 0);
     void torq_control(float torq);
 
     void MITControl(float pos, float vel, float torq, float kp, float kd);
 
     void start_motor();
     void stop_motor();
+
+    void getEncoderEstimates(float& pos, float& vel);
 
 };
 
