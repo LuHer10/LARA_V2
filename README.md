@@ -51,3 +51,17 @@ sudo ifconfig can0 up
 ```
 
 ### Stap 3: Configure the serial port
+
+## Steadywin GIM6010 Initial Configuration
+
+### With ODriveTool
+
+```bash
+odrv0.axis0.motor.config.current_lim = 3
+odrv0.config.dc_bus_undervoltage_trip_level = 10
+
+odrv0.axis0.config.can.heartbeat_rate_ms = 0
+odrv0.axis0.config.can.encoder_rate_ms = 0
+
+odrv0.save_configuration()
+```
