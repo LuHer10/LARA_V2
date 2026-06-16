@@ -56,7 +56,7 @@ sudo ifconfig can0 up
 
 ### With ODriveTool
 
-```bash
+```python
 odrv0.axis0.motor.config.current_lim = 3
 odrv0.config.dc_bus_undervoltage_trip_level = 10
 
