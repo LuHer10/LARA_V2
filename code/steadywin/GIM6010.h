@@ -84,16 +84,18 @@ private:
     SocketCAN* can;
     uint8_t id;
 
-    
-public:
-
     float pos;
     float vel;
     float torq;
 
+    float gear_ratio;
+    
+public:
+
     GIM6010(SocketCAN* _can, uint8_t _id):can(_can)
     {
         id = _id;
+        gear_ratio = 48;
     }
 
     void setAxisState(uint8_t state);
@@ -103,8 +105,12 @@ public:
     void setMITMode();
 
     void pos_control_rev(float revs, int16_t vel = 0, int16_t torq = 0);
-    void vel_control(float vel, int16_t torq = 0);
+    void pos_control_rad(float revs, int16_t vel = 0, int16_t torq = 0);
+    void vel_control(float vel, float torq = 0.0f);
     void torq_control(float torq);
+
+    void pos_ctrl_red_rev(float revs, int16_t vel = 0, int16_t torq = 0);
+    void pos_ctrl_red_rad(float rads, int16_t vel = 0, int16_t torq = 0);
 
     void MITControl(float pos, float vel, float torq, float kp, float kd);
 

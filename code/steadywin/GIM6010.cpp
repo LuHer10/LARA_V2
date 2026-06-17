@@ -85,6 +85,81 @@ void GIM6010::pos_control_rev(float revs, int16_t vel, int16_t torq)
     }
 }
 
+void GIM6010::pos_control_rad(float rads, int16_t vel, int16_t torq)
+{
+    float revs = rads / (2.0f * M_PI);
+    float _vel = vel / (2.0f * M_PI);
+    pos_control_rev(revs, _vel, torq);
+}
+
+
+
+void GIM6010::vel_control(float vel, float torq)
+{
+    fl32u8 _vel;
+    _vel.fl = vel;
+    fl32u8 _torq;
+    _torq.fl = torq;
+
+    struct can_frame frame;
+    frame.can_id = (id << 5) | MW_SET_INPUT_VEL_CMD;
+    frame.can_dlc = 8;
+    frame.data[0] = _vel.u8[0];
+    frame.data[1] = _vel.u8[1];
+    frame.data[2] = _vel.u8[2];
+    frame.data[3] = _vel.u8[3];
+    frame.data[4] = _torq.u8[0];
+    frame.data[5] = _torq.u8[1];
+    frame.data[6] = _torq.u8[2];
+    frame.data[7] = _torq.u8[3];
+
+    if (can->sendFrame(frame)) {
+        #ifdef DEBUG
+        std::cout << "Frame sent\n";
+        #endif
+    }
+}
+
+void GIM6010::torq_control(float torq)
+{
+    fl32u8 _torq;
+    _torq.fl = torq;
+
+    struct can_frame frame;
+    frame.can_id = (id << 5) | MW_SET_INPUT_VEL_CMD;
+    frame.can_dlc = 8;
+    frame.data[0] = _torq.u8[0];
+    frame.data[1] = _torq.u8[1];
+    frame.data[2] = _torq.u8[2];
+    frame.data[3] = _torq.u8[3];
+    frame.data[4] = 0x00;
+    frame.data[5] = 0x00;
+    frame.data[6] = 0x00;
+    frame.data[7] = 0x00;
+
+    if (can->sendFrame(frame)) {
+        #ifdef DEBUG
+        std::cout << "Frame sent\n";
+        #endif
+    }
+}
+
+void GIM6010::pos_ctrl_red_rev(float revs, int16_t vel = 0, int16_t torq = 0)
+{
+    float _revs = revs * gear_ratio;
+    int16_t _vel = vel * gear_ratio;
+    int16_t _torq = torq / gear_ratio;
+    pos_control_rev(_revs, _vel, _torq);
+}
+
+void GIM6010::pos_ctrl_red_rad(float rads, int16_t vel = 0, int16_t torq = 0)
+{
+    float revs = rads / (2.0f * M_PI);
+    int16_t _vel = vel / (2.0f * M_PI);
+    pos_ctrl_red_rev(revs, _vel, torq);
+}
+
+
 void GIM6010::MITControl(float pos, float vel, float torq, float kp, float kd)
 {
     // Implementation for MIT control
