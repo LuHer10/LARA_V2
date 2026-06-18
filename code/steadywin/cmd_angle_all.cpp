@@ -19,7 +19,7 @@ std::mutex mtx;
 
 void send_position_deg_smooth(Steadywin& m, float& ang, float& step_size)
 {
-    const int delta_time = 100; // Time in milliseconds
+    const int delta_time = 20; // Time in milliseconds
     mtx.lock();
     float current_angle = m.get_position_deg(); // Get the current position in degrees
     mtx.unlock();
@@ -112,11 +112,11 @@ int main() {
     can.setNonBlocking(true);
 
     Steadywin m1(&can, 1, GIM3505_8);
-    Steadywin m2(&can, 2, GIM4310_36);
+    Steadywin m2(&can, 0x02, GIM4310_36);
     GIM6010 m3(&can, 11);
     
 
-    m1.start_motor();
+    //m1.start_motor();
     m2.start_motor();
     m3.start_motor();
     m3.setTrapezodialMode();
@@ -126,7 +126,7 @@ int main() {
     //printf("Target Angle: ");
     //scanf("%f", &angle);
         
-    float deg_vel = 90.0f;
+    float deg_vel = 180.0f;
     float rad_vel = deg_vel*M_PI/180.0f;
     //std::thread pos_thread(send_position_deg, std::ref(m1), std::ref(angle));
     std::thread pos_thread3(send_position_deg, std::ref(m3), std::ref(angle));

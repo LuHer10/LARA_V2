@@ -594,7 +594,10 @@ float Steadywin::get_position_rad()
 
     float current_angle = (float)ang.fl;
 
-    current_angle = (current_angle*180.0f/M_PI) + 590040.0f;
+    if(motor_type == GIM3505_8)
+        current_angle = (current_angle*180.0f/M_PI) + 590040.0f;
+    if(motor_type == GIM4310_36)
+        current_angle = (current_angle*180.0f/M_PI) + 0.0f;
 
     pos_ind_deg = current_angle;
     pos_ind_rad = current_angle * M_PI / 180.0f;
@@ -645,7 +648,10 @@ float Steadywin::get_position_deg()
 
     float current_angle = (float)ang.fl;
 
-    current_angle = (current_angle*180.0f/M_PI) + 590040.0f;
+    if(motor_type == GIM3505_8)
+        current_angle = (current_angle*180.0f/M_PI) + 590040.0f;
+    if(motor_type == GIM4310_36)
+        current_angle = (current_angle*180.0f/M_PI) + 360.2145f;
 
     pos_ind_deg = current_angle;
     pos_ind_rad = current_angle * M_PI / 180.0f;
