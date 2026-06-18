@@ -111,6 +111,7 @@ public:
 
     void pos_ctrl_red_rev(float revs, int16_t vel = 0, int16_t torq = 0);
     void pos_ctrl_red_rad(float rads, int16_t vel = 0, int16_t torq = 0);
+    void pos_ctrl_red_deg(float degs, int16_t vel = 0, int16_t torq = 0);
 
     void MITControl(float pos, float vel, float torq, float kp, float kd);
 

@@ -144,7 +144,7 @@ void GIM6010::torq_control(float torq)
     }
 }
 
-void GIM6010::pos_ctrl_red_rev(float revs, int16_t vel = 0, int16_t torq = 0)
+void GIM6010::pos_ctrl_red_rev(float revs, int16_t vel, int16_t torq)
 {
     float _revs = revs * gear_ratio;
     int16_t _vel = vel * gear_ratio;
@@ -152,10 +152,17 @@ void GIM6010::pos_ctrl_red_rev(float revs, int16_t vel = 0, int16_t torq = 0)
     pos_control_rev(_revs, _vel, _torq);
 }
 
-void GIM6010::pos_ctrl_red_rad(float rads, int16_t vel = 0, int16_t torq = 0)
+void GIM6010::pos_ctrl_red_rad(float rads, int16_t vel, int16_t torq)
 {
     float revs = rads / (2.0f * M_PI);
     int16_t _vel = vel / (2.0f * M_PI);
+    pos_ctrl_red_rev(revs, _vel, torq);
+}
+
+void GIM6010::pos_ctrl_red_deg(float degs, int16_t vel, int16_t torq)
+{
+    float revs = degs / 360.0f;
+    int16_t _vel = vel / 360.0f;
     pos_ctrl_red_rev(revs, _vel, torq);
 }
 
@@ -243,7 +250,7 @@ void GIM6010::getEncoderEstimates(float& _pos, float& _vel)
 
     while (true) {
         if (can->receiveFrame(recv_frame)) {
-            std::cout << "Received ID: " << (recv_frame.can_id >> 5) << "\n";
+            //std::cout << "Received ID: " << (recv_frame.can_id >> 5) << "\n";
             break;
         }
     }
@@ -255,7 +262,7 @@ void GIM6010::getEncoderEstimates(float& _pos, float& _vel)
     memcpy(&pos_out, &recv_frame.data[0], sizeof(float));
     memcpy(&vel_out, &recv_frame.data[4], sizeof(float));
     
-    std::cout << "Position: " << pos_out << ", Velocity: " << vel_out << "\n";
+    //std::cout << "Position: " << pos_out << ", Velocity: " << vel_out << "\n";
     _pos = pos_out;
     _vel = vel_out;
 }
