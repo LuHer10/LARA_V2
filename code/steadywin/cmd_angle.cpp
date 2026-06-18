@@ -102,7 +102,7 @@ int main() {
 
     can.setNonBlocking(true);
 
-    Steadywin m1(&can, 0x01, GIM3505_8);
+    Steadywin m1(&can, 0x02, GIM4310_36);
 
 
     m1.start_motor();

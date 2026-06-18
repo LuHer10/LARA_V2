@@ -86,17 +86,17 @@ void send_position_rad_smooth(Steadywin& m, float& ang, float& step_size)
     }
 }
 
-void send_position_deg(Steadywin& m1, Steadywin& m2, GIM6010& m3, float& ang)
+void send_position_deg(GIM6010& m3, float& ang)
 {
     while (true) {
         //mtx.lock();
         float rads = ang * M_PI / 180.0f;
         float deg_vel = 90.0f;
-        send_position_deg_smooth(m1, ang, deg_vel);
-        send_position_deg_smooth(m2, ang, deg_vel);
+        //send_position_deg_smooth(m1, ang, deg_vel);
+        //send_position_deg_smooth(m2, ang, deg_vel);
         m3.pos_ctrl_red_rad(rads);
         //mtx.unlock();
-        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
 }
 
@@ -129,8 +129,9 @@ int main() {
     float deg_vel = 90.0f;
     float rad_vel = deg_vel*M_PI/180.0f;
     //std::thread pos_thread(send_position_deg, std::ref(m1), std::ref(angle));
-    std::thread pos_thread(send_position_deg, std::ref(m1), std::ref(m2), std::ref(m3), std::ref(angle));
-    //std::thread pos_thread(send_position_deg_smooth, std::ref(m1), std::ref(angle), std::ref(deg_vel));
+    std::thread pos_thread3(send_position_deg, std::ref(m3), std::ref(angle));
+    std::thread pos_thread1(send_position_deg_smooth, std::ref(m1), std::ref(angle), std::ref(deg_vel));
+    std::thread pos_thread2(send_position_deg_smooth, std::ref(m2), std::ref(angle), std::ref(deg_vel));
     //std::thread pos_thread(send_position_rad_smooth, std::ref(m1), std::ref(angle), std::ref(rad_vel));
     //std::thread pos_thread(&Steadywin::move_smooth_deg, &m1, std::ref(angle), std::ref(deg_vel));
 
@@ -145,7 +146,9 @@ int main() {
         //m1.stop_motor();
     }
 
-    pos_thread.join();
+    pos_thread1.join();
+    pos_thread2.join();
+    pos_thread3.join();
     m1.stop_motor();
     m2.stop_motor();
     m3.stop_motor();
