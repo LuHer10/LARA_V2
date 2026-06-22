@@ -14,9 +14,6 @@
 
 std::mutex mtx;
 
-
-
-
 void send_position_deg_smooth(Steadywin& m, float& ang, float& step_size)
 {
     const int delta_time = 20; // Time in milliseconds
