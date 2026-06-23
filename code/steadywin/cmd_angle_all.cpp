@@ -119,7 +119,7 @@ int main() {
     float deg_vel = 180.0f;
     float rad_vel = deg_vel*M_PI/180.0f;
     //std::thread pos_thread(send_position_deg, std::ref(m1), std::ref(angle));
-    //std::thread pos_thread3(send_position_deg, std::ref(m3), std::ref(angle));
+    std::thread pos_thread3(send_position_deg, std::ref(m3), std::ref(angle));
     std::thread pos_thread1(send_position_deg_smooth, std::ref(m1), std::ref(angle), std::ref(deg_vel));
     std::thread pos_thread2(send_position_deg_smooth, std::ref(m2), std::ref(angle), std::ref(deg_vel));
     //std::thread pos_thread(send_position_rad_smooth, std::ref(m1), std::ref(angle), std::ref(rad_vel));
@@ -130,7 +130,7 @@ int main() {
     while (true) {
         printf("Target Angle: ");
         scanf("%f", &angle);
-        if(angle == 2305) break;
+        if(angle == 1.0f) break;
         //m1.start_motor();
         //m1.pos_control_deg(angle);
         //std::this_thread::sleep_for(std::chrono::milliseconds(500));
