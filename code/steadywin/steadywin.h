@@ -139,6 +139,8 @@ public:
         id = _id;
         motor_type = _motor_type;
         turn = get_position_deg()/360.0f;
+        torq_const = get_torq_const();
+        gear_ratio = get_gear_ratio();
     }
     ~Steadywin()
     {

@@ -16,31 +16,24 @@ std::mutex mtx;
 
 void send_position_deg_smooth(Steadywin& m, float& ang, float& step_size)
 {
-    const int delta_time = 20; // Time in milliseconds
+    const int delta_time = 10; // Time in milliseconds
     mtx.lock();
     float current_angle = m.get_position_deg(); // Get the current position in degrees
     mtx.unlock();
     float step = step_size * ((float)delta_time/1000.0f);//(rpm / 60.0f) * (delta_time / 1000.0f);  // Adjust the step size as needed
 
     while (true) { // Loop until the target angle is reached
-        if(abs(ang - current_angle) > 1*step)
-        {
+        //if(abs(ang - current_angle) > 1*step)
+        //{
             if(ang > current_angle) {
                 current_angle += step; // Increment the angle
-            } else {
+            } else if(ang < current_angle){
                 current_angle -= step; // Decrement the angle
             }
             mtx.lock();
             m.pos_control_deg(current_angle);
             mtx.unlock();
-        }
-        else {
-            mtx.lock();
-            m.pos_control_deg(ang); // Set to target angle if close enough
-            current_angle = m.get_position_deg();
-            mtx.unlock();
-        }
-        //current_angle = m.get_position_deg();
+        //}
 
         std::this_thread::sleep_for(std::chrono::milliseconds(delta_time));
         //current_angle = m.get_position_deg(); // Get the current position in degrees
@@ -109,11 +102,11 @@ int main() {
     can.setNonBlocking(true);
 
     Steadywin m1(&can, 1, GIM3505_8);
-    Steadywin m2(&can, 0x02, GIM4310_36);
+    Steadywin m2(&can, 2, GIM4310_36);
     GIM6010 m3(&can, 11);
     
 
-    //m1.start_motor();
+    m1.start_motor();
     m2.start_motor();
     m3.start_motor();
     m3.setTrapezodialMode();
@@ -126,7 +119,7 @@ int main() {
     float deg_vel = 180.0f;
     float rad_vel = deg_vel*M_PI/180.0f;
     //std::thread pos_thread(send_position_deg, std::ref(m1), std::ref(angle));
-    std::thread pos_thread3(send_position_deg, std::ref(m3), std::ref(angle));
+    //std::thread pos_thread3(send_position_deg, std::ref(m3), std::ref(angle));
     std::thread pos_thread1(send_position_deg_smooth, std::ref(m1), std::ref(angle), std::ref(deg_vel));
     std::thread pos_thread2(send_position_deg_smooth, std::ref(m2), std::ref(angle), std::ref(deg_vel));
     //std::thread pos_thread(send_position_rad_smooth, std::ref(m1), std::ref(angle), std::ref(rad_vel));
@@ -137,15 +130,16 @@ int main() {
     while (true) {
         printf("Target Angle: ");
         scanf("%f", &angle);
+        if(angle == 2305) break;
         //m1.start_motor();
         //m1.pos_control_deg(angle);
         //std::this_thread::sleep_for(std::chrono::milliseconds(500));
         //m1.stop_motor();
     }
 
-    pos_thread1.join();
-    pos_thread2.join();
-    pos_thread3.join();
+    //pos_thread1.join();
+    //pos_thread2.join();
+    //pos_thread3.join();
     m1.stop_motor();
     m2.stop_motor();
     m3.stop_motor();
