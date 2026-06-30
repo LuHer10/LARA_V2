@@ -266,3 +266,21 @@ void GIM6010::getEncoderEstimates(float& _pos, float& _vel)
     _pos = pos_out;
     _vel = vel_out;
 }
+
+void GIM6010::getEncoderEstimates_rad(float& _pos, float& _vel)
+{
+    float revPos;
+    float revVel;
+    getEncoderEstimates(revPos, revVel);
+    _pos = revPos*2.0f*M_PI/48.0f;
+    _vel = revVel*2.0f*M_PI/48.0f;
+}
+
+void GIM6010::getEncoderEstimates_deg(float& _pos, float& _vel)
+{
+    float revPos;
+    float revVel;
+    getEncoderEstimates(revPos, revVel);
+    _pos = revPos*360.0f/48.0f;
+    _vel = revVel*360.0f/48.0f;
+}

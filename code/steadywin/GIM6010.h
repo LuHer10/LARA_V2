@@ -119,6 +119,8 @@ public:
     void stop_motor();
 
     void getEncoderEstimates(float& pos, float& vel);
+    void getEncoderEstimates_rad(float& pos, float& vel);
+    void getEncoderEstimates_deg(float& pos, float& vel);
 
 };
 
