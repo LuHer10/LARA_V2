@@ -5,7 +5,7 @@
 #include "steadywin.h"
 #include <thread>
 
-class ARM_H
+class Arm
 {
 private:
 
@@ -33,7 +33,19 @@ private:
     float px, py;
     float wx, wy;
 
-    void writePos(float _qBig, float _qMed, float _qSmall);
+    void writePos(float _mBig, float _mMed, float _mSmall);
+    void q2m(float _qBig, float _qMed, float _qSmall, float& _mBig, float& _mMed, float& _mSmall)
+    {
+        _mBig = _qBig - M_PI/2.0f;
+        _mMed = _qMed;
+        _mSmall = _qSmall;
+    }
+    void m2q(float _mBig, float _mMed, float _mSmall, float& _qBig, float& _qMed, float& _qSmall)
+    {
+        _qBig = _mBig + M_PI/2.0f;
+        _qMed = _mMed;
+        _qSmall = _mSmall;
+    }
     void q2m()
     {
         mBig = qBig - M_PI/2.0f;
@@ -69,9 +81,26 @@ public:
         l2 = _l2;
         l3 = _l3;
 
+        qBig = M_PI/2.0f;
+        qMed = M_PI/2.0f;
+        qSmall = M_PI/2.0f;
+        
+        q2m();
+
+        DK(qBig, qMed, qSmall, px, py, theta);
+
     }
 
     ~Arm()
+    {
+        small->stop_motor();
+        med->stop_motor();
+        big->stop_motor();
+    }
+
+    void writePosTh();
+
+    void stop()
     {
         small->stop_motor();
         med->stop_motor();
@@ -88,7 +117,7 @@ public:
     float getPy(){return py;}
     float getTheta(){return theta;}
 
-    void get_qs(float &q_1, float &q_2, float &q_3){q_1 = q1; q_2 = q2; q_3 = q3;}
+    //void get_qs(float &q_1, float &q_2, float &q_3){q_1 = q1; q_2 = q2; q_3 = q3;}
     void get_pos(float &p_x, float &p_y, float &th){p_x = px; p_y = py; th = theta;}
 
     int DK(float q_1, float q_2, float q_3, float &p_x, float &p_y, float &th);
