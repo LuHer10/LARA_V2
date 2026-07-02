@@ -23,12 +23,30 @@ private:
     float qBig;
     float qMed;
     float qSmall;
+
+    float mBig;
+    float mMed;
+    float mSmall;
+
     
     float theta;
     float px, py;
     float wx, wy;
 
     void writePos(float _qBig, float _qMed, float _qSmall);
+    void q2m()
+    {
+        mBig = qBig - M_PI/2.0f;
+        mMed = qMed;
+        mSmall = qSmall;
+    }
+    void m2q()
+    {
+        qBig = mBig + M_PI/2.0f;
+        qMed = mMed;
+        qSmall = mSmall;
+    }
+    
 
 public:
 
@@ -82,6 +100,7 @@ public:
     int move_qs(float q_1, float q_2, float q_3);
 
     void updateQs();
+
 
 };
 
