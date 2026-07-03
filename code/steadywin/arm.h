@@ -64,6 +64,7 @@ public:
 
     Arm(SocketCAN* _can, float _l1, float _l2, float _l3):can(_can)
     {
+        /*
         GIM6010 m1(can, 11);
         Steadywin m2(can, 2, GIM4310_36);
         Steadywin m3(can, 1, GIM3505_8);
@@ -71,6 +72,11 @@ public:
         big = &m1;
         med = &m2;
         small = &m3;
+        */
+
+        big = new GIM6010(can, 11);
+        med = new Steadywin(can, 2, GIM4310_36);
+        small = new Steadywin(can, 1, GIM3505_8);
 
         small->start_motor();
         med->start_motor();
