@@ -14,8 +14,8 @@ void Arm::writePosTh()
     float deg_vel = 180.0f;
     float step_size = deg_vel*M_PI/180.0f;
     const int delta_time = 10; // Time in milliseconds
-    float current_angle1 = med->get_position_deg(); // Get the current position in degrees
-    float current_angle2 = small->get_position_deg(); // Get the current position in degrees
+    float current_angle1 = med->get_position_rad(); // Get the current position in degrees
+    float current_angle2 = small->get_position_rad(); // Get the current position in degrees
     float step = step_size * ((float)delta_time/1000.0f);//(rpm / 60.0f) * (delta_time / 1000.0f);  // Adjust the step size as needed
 
     while (true) { // Loop until the target angle is reached
@@ -36,6 +36,8 @@ void Arm::writePosTh()
         small->pos_control_rad(current_angle2);
         big->pos_ctrl_red_rad(mBig);
 
+        current_angle1 = med->get_position_rad();
+        current_angle2 = small->get_position_rad();
 
         std::this_thread::sleep_for(std::chrono::milliseconds(delta_time));
         //current_angle = m.get_position_deg(); // Get the current position in degrees
