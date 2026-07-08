@@ -1,5 +1,7 @@
 #include <iostream>
 #include <math.h>
+#include "steadywin.h"
+#include "GIM6010.h"
 
 float l1 = 0.4f;
 float l2 = 0.33f;
@@ -25,9 +27,13 @@ void IK()
     float wy = y - l3*s(th);
     float wl = sqrt(wx*wx + wy*wy);
 
-    q2 = acos((l1*l1 + l2*l2 - wx*wx - wy*wy)/(2.0f * l1 * l2));
-    q1 = atan2(wy, wx) + asin((l2 * sin(q2))/sqrt(wx*wx + wy*wy));
+    float q_2 = acos((l1*l1 + l2*l2 - wx*wx - wy*wy)/(2.0f * l1 * l2));
+    float q_1 = atan2(wy, wx) + asin((l2 * sin(q2))/sqrt(wx*wx + wy*wy));
 
+    if(isnan(q_1) || isnan(q_2)) return;
+
+    q2 = q_2;
+    q1 = q_1;
     float alpha = q1 + q2 - M_PI;
 
     q3 = M_PI - alpha + th;
@@ -44,11 +50,34 @@ void DK()
 
 int main()
 {
+    //Can initialization
+    SocketCAN can("can0");
+    if (!can.open()) {
+        std::cerr << "Failed to open CAN\n";
+        return 1;
+    }
+    can.setNonBlocking(true);
+    
+    //Motor initialization
+    GIM6010 big(&can, 11);
+    Steadywin med(&can, 2, GIM4310_36);
+    Steadywin small(&can, 1, GIM3505_8);
+
+    big.start_motor();
+    med.start_motor();
+    small.start_motor();
+    big.setTrapezodialMode();
+
     x = l2 + l3;
     y = l1;
     th = 0.0f;
 
     IK();
+
+    //Move motors to initial position
+    big.pos_ctrl_red_rad(q1 - (M_PI/2.0f));
+    med.pos_control_rad(q2);
+    small.pos_control_rad(q3);
 
     std::cout << "x: " << x << ", y: " << y << ", th: " << th 
             << ", q1: " << q1*180.0f/M_PI 
@@ -78,6 +107,13 @@ int main()
         if(dir == 'x') break;
 
         IK();
+
+        //Move motors
+        big.pos_ctrl_red_rad(q1 - (M_PI/2.0f));
+        med.pos_control_rad(q2);
+        small.pos_control_rad(q3);
+
+        DK();
 
         std::cout << "x: " << x << ", y: " << y << ", th: " << th 
                 << ", q1: " << q1*180.0f/M_PI 

@@ -122,6 +122,8 @@ public:
     void getEncoderEstimates_rad(float& pos, float& vel);
     void getEncoderEstimates_deg(float& pos, float& vel);
 
+    float getPositionRad();
+
 };
 
 #endif

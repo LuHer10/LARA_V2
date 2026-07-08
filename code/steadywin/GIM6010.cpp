@@ -284,3 +284,10 @@ void GIM6010::getEncoderEstimates_deg(float& _pos, float& _vel)
     _pos = revPos*360.0f/48.0f;
     _vel = revVel*360.0f/48.0f;
 }
+
+float GIM6010::getPositionRad()
+{
+    float _pos, _vel;
+    getEncoderEstimates_rad(_pos, _vel);
+    return _pos;
+}
