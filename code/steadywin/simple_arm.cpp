@@ -1,5 +1,6 @@
 #include <iostream>
 #include <math.h>
+#include <thread>
 #include "steadywin.h"
 #include "GIM6010.h"
 
@@ -9,7 +10,9 @@ float l3 = 0.1f;
 
 float x, y, th;
 float q1, q2, q3;
-float m1, m2, m3;
+float mq1, mq2, mq3;
+
+char dir;
 
 float s(float ang)
 {
@@ -28,7 +31,7 @@ void IK()
     float wl = sqrt(wx*wx + wy*wy);
 
     float q_2 = acos((l1*l1 + l2*l2 - wx*wx - wy*wy)/(2.0f * l1 * l2));
-    float q_1 = atan2(wy, wx) + asin((l2 * sin(q2))/sqrt(wx*wx + wy*wy));
+    float q_1 = atan2(wy, wx) + asin((l2 * sin(q_2))/sqrt(wx*wx + wy*wy));
 
     if(isnan(q_1) || isnan(q_2)) return;
 
@@ -46,6 +49,23 @@ void DK()
     x = l1 * c(q1) + l2 * c(q1 + q2 - M_PI) + l3 * c(q1 + q2 + q3 - 2.0f*M_PI);
     y = l1 * s(q1) + l2 * s(q1 + q2 - M_PI) + l3 * s(q1 + q2 + q3 - 2.0f*M_PI);
     th = q3 - M_PI + alpha;
+}
+
+void motor_control(GIM6010& m1, Steadywin& m2, Steadywin& m3,
+                     float& _q1, float& _q2, float& _q3)
+{
+    while(true)
+    {
+        if(dir == 'x') break;
+        m1.pos_ctrl_red_rad(_q1 - (M_PI/2.0f));
+        m2.pos_control_rad(_q2);
+        m3.pos_control_rad(_q3);   
+        std::this_thread::sleep_for(std::chrono::milliseconds(10)); 
+        mq1 = m1.getPositionRad();
+        mq2 = m2.get_position_rad();
+        mq3 = m3.get_position_rad();
+        std::this_thread::sleep_for(std::chrono::milliseconds(10)); 
+    }
 }
 
 int main()
@@ -84,6 +104,10 @@ int main()
             << ", q2: " << q2*180.0f/M_PI  
             << ", q3: " << q3*180.0f/M_PI << "\n";
 
+    std::thread pos_thread(motor_control, std::ref(big), std::ref(med), std::ref(small), 
+                            std::ref(q1), std::ref(q2), std::ref(q3));
+    
+        
     while(true)
     {
         char dir;
@@ -109,18 +133,26 @@ int main()
         IK();
 
         //Move motors
-        big.pos_ctrl_red_rad(q1 - (M_PI/2.0f));
-        med.pos_control_rad(q2);
-        small.pos_control_rad(q3);
+        //big.pos_ctrl_red_rad(q1 - (M_PI/2.0f));
+        //med.pos_control_rad(q2);
+        //small.pos_control_rad(q3);
 
-        DK();
+        //DK();
 
         std::cout << "x: " << x << ", y: " << y << ", th: " << th 
-                << ", q1: " << q1*180.0f/M_PI 
-                << ", q2: " << q2*180.0f/M_PI  
-                << ", q3: " << q3*180.0f/M_PI << "\n";
+                << ", q1: " << (mq1 + (M_PI/2.0f))*180.0f/M_PI 
+                << ", q2: " << mq2*180.0f/M_PI  
+                << ", q3: " << mq3*180.0f/M_PI << "\n";
 
     }
+
+    dir = 'x';
+
+    big.stop_motor();
+    med.stop_motor();
+    small.stop_motor();
+
+    pos_thread.join();
 
     return 0;
 }
