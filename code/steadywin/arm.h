@@ -9,6 +9,9 @@
 #include <iostream>
 #include <atomic>
 
+#define BIG_ID 11
+#define MEDIUM_ID 2
+#define SMALL_ID 1
 
 class Arm
 {
@@ -57,9 +60,9 @@ private:
 public:
     Arm(SocketCAN* _can, float _l1, float _l2, float _l3):can(_can)
     {
-        bigMotor = new GIM6010(can, 11);
-        mediumMotor = new Steadywin(can, 2, GIM4310_36);
-        smallMotor = new Steadywin(can, 1, GIM3505_8);
+        bigMotor = new GIM6010(can, BIG_ID);
+        mediumMotor = new Steadywin(can, MEDIUM_ID, GIM4310_36);
+        smallMotor = new Steadywin(can, SMALL_ID, GIM3505_8);
 
         bigMotor->start_motor();
         mediumMotor->start_motor();
