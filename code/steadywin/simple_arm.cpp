@@ -3,6 +3,7 @@
 #include <thread>
 #include "steadywin.h"
 #include "GIM6010.h"
+#include "arm2.h"
 
 float l1 = 0.4f;
 float l2 = 0.33f;

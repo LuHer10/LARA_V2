@@ -1,142 +1,171 @@
 #ifndef ARM_H
 #define ARM_H
 
+#include "socketcan.h"
 #include "GIM6010.h"
 #include "steadywin.h"
+#include <cmath>
 #include <thread>
+#include <iostream>
+
 
 class Arm
 {
 private:
+    float l1, l2, l3;
+
+    float q1, q2, q3;
+    float x, y, th;
+
+    float mq1, mq2, mq3;
+    float mx, my, mth;
 
     SocketCAN* can;
 
-    std::thread *arm_thread;
+    GIM6010* bigMotor;
+    Steadywin* mediumMotor;
+    Steadywin* smallMotor;
 
-    GIM6010 *big;
-    Steadywin *med;
-    Steadywin *small;
+    std::thread controlThread;
+    bool stopThread = false;
 
-    float l1, l2, l3;
-
-
-    float qBig;
-    float qMed;
-    float qSmall;
-
-    float mBig;
-    float mMed;
-    float mSmall;
-
-    
-    float theta;
-    float px, py;
-    float wx, wy;
-
-    void writePos(float _mBig, float _mMed, float _mSmall);
-    void q2m(float _qBig, float _qMed, float _qSmall, float& _mBig, float& _mMed, float& _mSmall)
+    void motorControl()
     {
-        _mBig = _qBig - M_PI/2.0f;
-        _mMed = _qMed;
-        _mSmall = _qSmall;
+        std::cout << "Motor control active\n";
+
+        while(true)
+        {
+            if(stopThread) break;
+            bigMotor->pos_ctrl_red_rad(q1 - (M_PI/2.0f));
+            mediumMotor->pos_control_rad(q2);
+            smallMotor->pos_control_rad(q3);   
+            std::this_thread::sleep_for(std::chrono::milliseconds(10)); 
+            mq1 = bigMotor->getPositionRad();
+            mq2 = mediumMotor->get_position_rad();
+            mq3 = smallMotor->get_position_rad();
+            DK(mq1 + (M_PI/2.0f), mq2, mq3, mx, my, mth);
+            std::this_thread::sleep_for(std::chrono::milliseconds(10)); 
+        }
+        std::cout << "Motor control inactive\n";
+
     }
-    void m2q(float _mBig, float _mMed, float _mSmall, float& _qBig, float& _qMed, float& _qSmall)
-    {
-        _qBig = _mBig + M_PI/2.0f;
-        _qMed = _mMed;
-        _qSmall = _mSmall;
-    }
-    void q2m()
-    {
-        mBig = qBig - M_PI/2.0f;
-        mMed = qMed;
-        mSmall = qSmall;
-    }
-    void m2q()
-    {
-        qBig = mBig + M_PI/2.0f;
-        qMed = mMed;
-        qSmall = mSmall;
-    }
-    
 
 public:
-
     Arm(SocketCAN* _can, float _l1, float _l2, float _l3):can(_can)
     {
-        /*
-        GIM6010 m1(can, 11);
-        Steadywin m2(can, 2, GIM4310_36);
-        Steadywin m3(can, 1, GIM3505_8);
+        bigMotor = new GIM6010(can, 11);
+        mediumMotor = new Steadywin(can, 2, GIM4310_36);
+        smallMotor = new Steadywin(can, 1, GIM3505_8);
 
-        big = &m1;
-        med = &m2;
-        small = &m3;
-        */
-
-        big = new GIM6010(can, 11);
-        med = new Steadywin(can, 2, GIM4310_36);
-        small = new Steadywin(can, 1, GIM3505_8);
-
-        small->start_motor();
-        med->start_motor();
-        big->start_motor();
-        big->setTrapezodialMode();
+        bigMotor->start_motor();
+        mediumMotor->start_motor();
+        smallMotor->start_motor();
+        bigMotor->setTrapezodialMode();
 
         l1 = _l1;
         l2 = _l2;
         l3 = _l3;
 
-        qBig = M_PI/2.0f;
-        qMed = M_PI/2.0f;
-        qSmall = M_PI/2.0f;
-        
-        q2m();
+        x = l2 + l3;
+        y = l1;
+        th = 0.0f;
 
-        DK(qBig, qMed, qSmall, px, py, theta);
+        IK();
+
+        controlThread = std::thread(&Arm::motorControl, this);
 
     }
 
     ~Arm()
     {
-        small->stop_motor();
-        med->stop_motor();
-        big->stop_motor();
+        stopThread = true;
+        controlThread.join();
+        //bigMotor->stop_motor();
+        mediumMotor->stop_motor();
+        smallMotor->stop_motor();
     }
 
-    void writePosTh();
 
-    void stop()
+    void IK(float _x, float _y, float _th, float& _q1, float& _q2, float& _q3)
     {
-        small->stop_motor();
-        med->stop_motor();
-        big->stop_motor();
+        float wx = _x - l3*cos(_th);
+        float wy = _y - l3*sin(_th);
+        float wl = sqrt(wx*wx + wy*wy);
+
+        float q_2 = acos((l1*l1 + l2*l2 - wx*wx - wy*wy)/(2.0f * l1 * l2));
+        float q_1 = atan2(wy, wx) + asin((l2 * sin(q_2))/sqrt(wx*wx + wy*wy));
+
+        if(isnan(q_1) || isnan(q_2)) return;
+
+        _q2 = q_2;
+        _q1 = q_1;
+        float alpha = _q1 + _q2 - M_PI;
+
+        _q3 = M_PI - alpha + th;
     }
 
-    void setP(float p_x, float p_y)
+    void IK()
     {
-        px = p_x;
-        py = p_y;
+        IK(x, y, th, q1, q2, q3);
     }
-    void setTheta(float th){theta = th;}
-    float getPx(){return px;}
-    float getPy(){return py;}
-    float getTheta(){return theta;}
 
-    //void get_qs(float &q_1, float &q_2, float &q_3){q_1 = q1; q_2 = q2; q_3 = q3;}
-    void get_pos(float &p_x, float &p_y, float &th){p_x = px; p_y = py; th = theta;}
+    void DK(float _q1, float _q2, float _q3, float& _x, float& _y, float& _th)
+    {
+        float alpha = _q1 + _q2 - M_PI;
+        _x = l1 * cos(_q1) + l2 * cos(_q1 + _q2 - M_PI) + l3 * cos(_q1 + _q2 + _q3 - 2.0f*M_PI);
+        _y = l1 * sin(_q1) + l2 * sin(_q1 + _q2 - M_PI) + l3 * sin(_q1 + _q2 + _q3 - 2.0f*M_PI);
+        _th = _q3 - M_PI + alpha;
+    }
 
-    int DK(float q_1, float q_2, float q_3, float &p_x, float &p_y, float &th);
-    int IK(float p_x, float p_y, float th, float &q_1, float &q_2, float &q_3);
+    void DK()
+    {
+        DK(q1, q2, q3, x, y, th);
+    }
 
-    int move(float p_x, float p_y, float th);
-    int moveIncr(float dx, float dy, float dth);
+    void getQs(float& _q1, float& _q2, float& _q3)
+    {
+        _q1 = q1;
+        _q2 = q2;
+        _q3 = q3;
+    }
 
-    int move_qs(float q_1, float q_2, float q_3);
+    void getCoord(float& _x, float& _y, float& _th)
+    {
+        _x = x;
+        _y = y;
+        _th = th;
+    }
 
-    void updateQs();
+    void getMqs(float& _mq1, float& _mq2, float& _mq3)
+    {
+        _mq1 = mq1;
+        _mq2 = mq2;
+        _mq3 = mq3;
+    }
 
+    void getMCoord(float& _mx, float& _my, float& _mth)
+    {
+        _mx = mx;
+        _my = my;
+        _mth = mth;
+    }
 
+    void moveCoord(float _x, float _y, float _th)
+    {
+        x = _x;
+        y = _y;
+        th = _th;
+        IK();
+    }
+    
+    void moveCoordIncr(float dx, float dy, float dth)
+    {
+        x += dx;
+        y += dy;
+        th += dth;
+        IK();
+    }
+    
 };
 
-#endif
+#endif //ARM_H
