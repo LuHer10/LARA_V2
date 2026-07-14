@@ -37,9 +37,9 @@ private:
         while(true)
         {
             if(stopThread) break;
-            bigMotor->pos_ctrl_red_rad(q1 - (M_PI/2.0f));
-            mediumMotor->pos_control_rad(q2);
-            smallMotor->pos_control_rad(q3);   
+            bigMotor->pos_ctrl_red_rad(q1.load() - (M_PI/2.0f));
+            mediumMotor->pos_control_rad(q2.load());
+            smallMotor->pos_control_rad(q3.load());   
             std::this_thread::sleep_for(std::chrono::milliseconds(10)); 
             mq1.store(bigMotor->getPositionRad());
             mq2.store(mediumMotor->get_position_rad());
