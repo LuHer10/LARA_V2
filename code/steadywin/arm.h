@@ -7,6 +7,7 @@
 #include <cmath>
 #include <thread>
 #include <iostream>
+#include <atomic>
 
 
 class Arm
@@ -14,11 +15,11 @@ class Arm
 private:
     float l1, l2, l3;
 
-    float q1, q2, q3;
-    float x, y, th;
+    std::atomic<float> q1, q2, q3;
+    std::atomic<float> x, y, th;
 
-    float mq1, mq2, mq3;
-    float mx, my, mth;
+    std::atomic<float> mq1, mq2, mq3;
+    std::atomic<float> mx, my, mth;
 
     SocketCAN* can;
 
@@ -32,7 +33,7 @@ private:
     void motorControl()
     {
         std::cout << "Motor control active\n";
-
+        float _mx, _my, _mth;
         while(true)
         {
             if(stopThread) break;
@@ -40,10 +41,13 @@ private:
             mediumMotor->pos_control_rad(q2);
             smallMotor->pos_control_rad(q3);   
             std::this_thread::sleep_for(std::chrono::milliseconds(10)); 
-            mq1 = bigMotor->getPositionRad();
-            mq2 = mediumMotor->get_position_rad();
-            mq3 = smallMotor->get_position_rad();
-            DK(mq1 + (M_PI/2.0f), mq2, mq3, mx, my, mth);
+            mq1.store(bigMotor->getPositionRad());
+            mq2.store(mediumMotor->get_position_rad());
+            mq3.store(smallMotor->get_position_rad());
+            DK(mq1.load() + (M_PI/2.0f), mq2.load(), mq3.load(), _mx, _my, _mth);
+            mx.store(_mx);
+            my.store(_my);
+            mth.store(_mth);
             std::this_thread::sleep_for(std::chrono::milliseconds(10)); 
         }
         std::cout << "Motor control inactive\n";
@@ -66,9 +70,9 @@ public:
         l2 = _l2;
         l3 = _l3;
 
-        x = l2 + l3;
-        y = l1;
-        th = 0.0f;
+        x.store(l2 + l3);
+        y.store(l1);
+        th.store(0.0f);
 
         IK();
 
@@ -106,7 +110,11 @@ public:
 
     void IK()
     {
-        IK(x, y, th, q1, q2, q3);
+        float _q1, _q2, _q3;
+        IK(x.load(), y.load(), th.load(), _q1, _q2, _q3);
+        q1.store(_q1);
+        q2.store(_q2);
+        q3.store(_q3);
     }
 
     void DK(float _q1, float _q2, float _q3, float& _x, float& _y, float& _th)
@@ -119,50 +127,58 @@ public:
 
     void DK()
     {
-        DK(q1, q2, q3, x, y, th);
+        float _x, _y, _th;
+        DK(q1.load(), q2.load(), q3.load(), _x, _y, _th);
+        x.store(_x);
+        y.store(_y);
+        th.store(_th);
     }
 
     void getQs(float& _q1, float& _q2, float& _q3)
     {
-        _q1 = q1;
-        _q2 = q2;
-        _q3 = q3;
+        _q1 = q1.load();
+        _q2 = q2.load();
+        _q3 = q3.load();
     }
 
     void getCoord(float& _x, float& _y, float& _th)
     {
-        _x = x;
-        _y = y;
-        _th = th;
+        _x = x.load();
+        _y = y.load();
+        _th = th.load();
     }
 
     void getMqs(float& _mq1, float& _mq2, float& _mq3)
     {
-        _mq1 = mq1;
-        _mq2 = mq2;
-        _mq3 = mq3;
+        _mq1 = mq1.load();
+        _mq2 = mq2.load();
+        _mq3 = mq3.load();
     }
 
     void getMCoord(float& _mx, float& _my, float& _mth)
     {
-        _mx = mx;
-        _my = my;
-        _mth = mth;
+        _mx = mx.load();
+        _my = my.load();
+        _mth = mth.load();
     }
 
     void moveCoord(float _x, float _y, float _th)
     {
-        x = _x;
-        y = _y;
-        th = _th;
+        x.store(_x);
+        y.store(_y);
+        th.store(_th);
         IK();
     }
     
     void moveCoordIncr(float dx, float dy, float dth)
     {
-        x += dx;
-        y += dy;
-        th += dth;
+        x.store(x.load() + dx);
+        y.store(y.load() + dy);
+        th.store(th.load() + dth);
+
+        //x += dx;
+        //y += dy;
+        //th += dth;
         IK();
     }
     
