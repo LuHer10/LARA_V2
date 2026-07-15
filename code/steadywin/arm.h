@@ -93,7 +93,7 @@ public:
     }
 
 
-    void IK(float _x, float _y, float _th, float& _q1, float& _q2, float& _q3)
+    int IK(float _x, float _y, float _th, float& _q1, float& _q2, float& _q3)
     {
         float wx = _x - l3*cos(_th);
         float wy = _y - l3*sin(_th);
@@ -102,19 +102,21 @@ public:
         float q_2 = acos((l1*l1 + l2*l2 - wx*wx - wy*wy)/(2.0f * l1 * l2));
         float q_1 = atan2(wy, wx) + asin((l2 * sin(q_2))/sqrt(wx*wx + wy*wy));
 
-        if(isnan(q_1) || isnan(q_2)) return;
+        if(isnan(q_1) || isnan(q_2)) return 1;
 
         _q2 = q_2;
         _q1 = q_1;
         float alpha = _q1 + _q2 - M_PI;
 
         _q3 = M_PI - alpha + th;
+
+        return 0;
     }
 
     void IK()
     {
         float _q1, _q2, _q3;
-        IK(x.load(), y.load(), th.load(), _q1, _q2, _q3);
+        if(IK(x.load(), y.load(), th.load(), _q1, _q2, _q3))return;
         q1.store(_q1);
         q2.store(_q2);
         q3.store(_q3);
