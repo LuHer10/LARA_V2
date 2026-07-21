@@ -11,7 +11,7 @@ Then perform an update
 ```bash
 sudo apt update
 ```
-### Step 2: Configure the CAN Hat
+### Step 2: Configure the CAN Hat for Steadywin motors
 
 Add the following lines to /boot/firmware/config.txt
 ```bash
@@ -50,7 +50,28 @@ sudo ifconfig can0 txqueuelen 65536
 sudo ifconfig can0 up
 ```
 
-### Stap 3: Configure the serial port
+### Step 3: Configure the serial port for the RoboClaw
+
+### Step 4: Setup libraries for the Dynamixel servos
+
+Download Dynamixel SDK
+```bash
+git clone https://github.com/ROBOTIS-GIT/DynamixelSDK.git
+```
+
+Install requirements
+```bash
+sudo apt-get install gcc
+sudo apt-get install build-essential
+```
+
+Build the SDK
+```bash
+cd DynamixelSDK/c++/build/linux_sbc
+sudo make install
+```
+
+Done!
 
 ## Steadywin GIM6010 Initial Configuration
 
