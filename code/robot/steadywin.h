@@ -1,0 +1,188 @@
+#include "socketcan.h"
+#include "types.h"
+#include <iostream>
+#include <thread>
+#include <mutex>
+#include <chrono>
+#include <math.h>
+
+#ifndef STEADYWIN_H
+#define STEADYWIN_H
+
+//#define DEBUG
+
+//#define M_PI 3.1415926536f
+
+inline std::mutex stw_mtx;
+
+#define GIM3505_8 0
+#define GIM4310_36 1
+#define GIM6010_48 2
+
+#define GIM3505_8_OFFSET -44276
+#define GIM4310_36_OFFSET -20553
+#define GIM6010_48_OFFSET 0
+
+#define GIM3505_8_APP_OFFSET -79.7f
+#define GIM4310_36_APP_OFFSET -266.8f
+#define GIM6010_48_APP_OFFSET 0.0f
+
+typedef enum
+{
+    RESET_CONFIG       = 0x81,
+    REFRESH_CONFIG     = 0x82,
+    MODIFY_CONFIG      = 0x83,
+    RETRIEVE_CONFIG    = 0x84,
+
+    START_MOTOR        = 0x91,
+    STOP_MOTOR         = 0x92,
+    TORQUE_CONTROL     = 0x93,
+    SPEED_CONTROL      = 0x94,
+    POSITION_CONTROL   = 0x95,
+    PTS_CONTROL        = 0x96,
+    STOP_CONTROL       = 0x97,
+
+    MODIFY_PARAM       = 0xA1,
+    RETRIEVE_PARAM     = 0xA2,
+
+    GET_VERSION        = 0xB1,
+    GET_FAULT          = 0xB2,
+    ACK_FAULT          = 0xB3,
+    RETRIEVE_INDICATOR = 0xB4,
+    CALIBRATE          = 0xB5,
+
+    UPDATE_FIRMWARE = 0xC1
+} COMMANDS;
+
+typedef enum
+{
+    POLE_PAIRS           = 0x00,
+    RATED_CURRENT        = 0x01,
+    MAX_SPEED            = 0x02,
+    RATED_VOLTAGE        = 0x06,
+    PWM_FREQ             = 0x07,
+    DEF_KP_CURRENT       = 0x08,
+    DEF_KI_CURRENT       = 0x09,
+    DEF_KP_SPEED         = 0X0C,
+    DEF_KI_SPEED         = 0x0D,
+    DEF_KP_POSITION      = 0x0E,
+    DEF_KI_POSITION      = 0x0F,
+    DEF_KD_POSITION      = 0x10,
+    GEAR_RATIO           = 0x11,
+    CAN_ID               = 0x12,
+    HOST_CAN_ID          = 0x13,
+    ZERO_POSITION        = 0x14,
+    POWER_OFF_POS        = 0x15,
+    OVER_VOLTAGE_THRESH  = 0x16,
+    UNDER_VOLTAGE_THRESH = 0x17,
+    CAN_BAUD_RATE        = 0x18,
+    DEF_KP_FLUX          = 0x19,
+    DEF_KI_FLUX          = 0x1A,
+    OVER_TEMP_THRESH     = 0x20,
+    CAN_PROTOCOL         = 0x1C
+} CONF_ID;
+
+typedef enum
+{
+    BUS_VOLTAGE       = 0X00,
+    DRIVER_BOARD_TEMP = 0X01,
+    MOTOR_TEMP        = 0X02,
+    POWER             = 0X03,
+    I_A               = 0X04,
+    I_B               = 0X05,
+    I_C               = 0X06,
+    I_ALPHA           = 0X07,
+    I_BETA            = 0X08,
+    I_Q               = 0x09,
+    I_D               = 0X0A,
+    TARGET_IQ         = 0X0B,
+    TARGET_ID         = 0X0C,
+    V_Q               = 0X0D,
+    V_D               = 0X0E,
+    V_ALPHA           = 0X0F,
+    V_BETA            = 0X10,
+    ANGLE_ROTOR_ELEC  = 0X11,
+    ANGLE_ROTOR_MEC   = 0X12,
+    ANGLE_OUTPUT_MEC  = 0X13,
+    OUTPUT_SPEED      = 0X14,
+    OUTPUT_POWER      = 0X15
+} IND_ID;
+
+
+class Steadywin
+{
+private:
+    SocketCAN* can;
+    int id;
+    int motor_type;
+
+    int8_t temp;
+    float pos;
+    float speed;
+    float torque;
+    float torq_const;
+    int32_t gear_ratio;
+
+    float pos_ind_deg;
+    float pos_ind_rad;
+    float speed_ind_rpms;
+    float speed_ind_rad;
+    float speed_ind_deg;
+
+    int turn = 0;
+
+public:
+
+    Steadywin(SocketCAN* _can, int _id, int _motor_type):can(_can)
+    {
+        //can = _can;
+        id = _id;
+        motor_type = _motor_type;
+        turn = get_position_deg()/360.0f;
+        torq_const = get_torq_const();
+        gear_ratio = get_gear_ratio();
+    }
+    ~Steadywin()
+    {
+        stop_motor();
+    }
+
+    float get_torq_const();
+    int32_t get_gear_ratio();
+
+    int reset_config();
+    int refresh_config();
+    int mod_config(int confid, int32_t data);
+    int retr_config(uint8_t confid, int32_t& data);
+
+    int start_motor();
+    int stop_motor();
+    int torque_control(float _torque, uint32_t duration = 0);
+    int speed_control(float _speed, uint32_t duration = 0);
+    int pos_control_rad(float _pos, uint32_t duration = 0);
+    int pos_control_deg(float _pos, uint32_t duration = 0);
+    int stop_control();
+
+    int mod_param(int param_id, uint32_t value);
+    int retr_param(int param_id, uint32_t& value);
+
+    int get_version();
+    int get_fault();
+    int ack_fault();
+    int retr_indicator(int ind_id, float& value);
+    int calibrate(int calib_type);
+
+    void update_firmware();
+
+    float get_position_deg();
+    float get_position_rad();
+    float get_speed_rpm();
+    float get_speed_rad();
+    float get_speed_deg();
+
+    void move_smooth_deg(float& ang, float& step_size); //Use only in a thread, as it is a blocking function that will continuously update the position until the target angle is reached. Step size is in deg/s.
+    void move_smooth_rad(float& ang, float& step_size); //Use only in a thread, as it is a blocking function that will continuously update the position until the target angle is reached. Step size is in rad/s.
+
+};
+
+#endif
