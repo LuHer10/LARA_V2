@@ -44,10 +44,10 @@ private:
             mediumMotor->pos_control_rad(q2.load());
             smallMotor->pos_control_rad(q3.load());   
             std::this_thread::sleep_for(std::chrono::milliseconds(10)); 
-            mq1.store(bigMotor->getPositionRad());
+            mq1.store(bigMotor->getPositionRad() + (M_PI/2.0f));
             mq2.store(mediumMotor->get_position_rad());
             mq3.store(smallMotor->get_position_rad());
-            DK(mq1.load() + (M_PI/2.0f), mq2.load(), mq3.load(), _mx, _my, _mth);
+            DK(mq1.load(), mq2.load(), mq3.load(), _mx, _my, _mth);
             mx.store(_mx);
             my.store(_my);
             mth.store(_mth);
@@ -113,13 +113,14 @@ public:
         return 0;
     }
 
-    void IK()
+    int IK()
     {
         float _q1, _q2, _q3;
-        if(IK(x.load(), y.load(), th.load(), _q1, _q2, _q3))return;
+        if(IK(x.load(), y.load(), th.load(), _q1, _q2, _q3))return 1;
         q1.store(_q1);
         q2.store(_q2);
         q3.store(_q3);
+        return 0;
     }
 
     void DK(float _q1, float _q2, float _q3, float& _x, float& _y, float& _th)
@@ -177,9 +178,16 @@ public:
     
     void moveCoordIncr(float dx, float dy, float dth)
     {
-        x.store(x.load() + dx);
-        y.store(y.load() + dy);
-        th.store(th.load() + dth);
+        float newX = x.load() + dx;
+        float newY = y.load() + dy;
+        float newTh = th.load() + dth;
+        float _q1, _q2, _q3;
+
+        if(IK(newX, newY, newTh, _q1, _q2, _q3)) return;
+
+        x.store(newX);
+        y.store(newY);
+        th.store(newTh);
 
         //x += dx;
         //y += dy;

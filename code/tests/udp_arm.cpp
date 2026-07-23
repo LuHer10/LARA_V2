@@ -50,7 +50,7 @@ int main() {
     float l2 = 0.33f;
     float l3 = 0.1f;
 
-    Arm arm(l1, l2, l3);
+    Arm arm(&can, l1, l2, l3);
     arm.getCoord(arm_x, arm_y, arm_th);
     arm.getQs(q1, q2, q3);
     
@@ -107,7 +107,7 @@ int main() {
         if(x_right || y_right)
         {
             if(manual == 0)
-                arm.moveCoordIncr(x_right*0.005f, y_right*0.005f, 0.0f);
+                arm.moveCoordIncr(x_right*0.0001f, y_right*0.0001f, 0.0f);
             if(manual == 1)
             {
                 //arm.move_q1(PI/2.0f);
@@ -135,10 +135,10 @@ int main() {
         }
         */
 
-        printf("%f, %f, %f      ", q1*180.0f/PI, q2*180.0f/PI, q3*180.0f/PI);
+        printf("%f, %f, %f      ", q1*180.0f/M_PI, q2*180.0f/M_PI, q3*180.0f/M_PI);
         printf("%f, %f, %f, %d  \n", arm_x, arm_y, arm_th, mode);
 
-        //printf("%f, %f, %f, %f, %d", x_left, y_left, x_right, y_right, grip);
+        //printf("%f, %f, %f, %f, %d \n", x_left, y_left, x_right, y_right, grip);
 
         usleep(1000);  // 10 Hz loop
     
