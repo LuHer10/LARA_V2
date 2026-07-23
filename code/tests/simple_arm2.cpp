@@ -1,9 +1,9 @@
 #include <iostream>
 #include <math.h>
 #include <thread>
-#include "steadywin.h"
-#include "GIM6010.h"
-#include "arm.h"
+#include "../robot/steadywin.h"
+#include "../robot/GIM6010.h"
+#include "../robot/arm.h"
 
 
 
