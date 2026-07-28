@@ -13,6 +13,10 @@
 #define MEDIUM_ID 2
 #define SMALL_ID 1
 
+#define BIG_OFFSET 2.0f
+#define MEDIUM_OFFSET -200.0f
+#define SMALL_OFFSET 190.0f
+
 float deg2rad(float _deg)
 {
     float _rad = _deg*M_PI/180.0f;
@@ -46,13 +50,13 @@ private:
         while(true)
         {
             if(stopThread) break;
-            bigMotor->pos_ctrl_red_rad(q1.load() - (M_PI/2.0f) + deg2rad(2.0f));
-            mediumMotor->pos_control_rad(-q2.load() - deg2rad(90.0f));
-            smallMotor->pos_control_rad(q3.load());   
+            bigMotor->pos_ctrl_red_rad(q1.load() - (M_PI/2.0f) + deg2rad(BIG_OFFSET));
+            mediumMotor->pos_control_rad(-q2.load() + deg2rad(MEDIUM_OFFSET));
+            smallMotor->pos_control_rad(q3.load() + deg2rad(SMALL_OFFSET));   
             std::this_thread::sleep_for(std::chrono::milliseconds(10)); 
-            mq1.store(bigMotor->getPositionRad() + (M_PI/2.0f) - deg2rad(2.0f));
-            mq2.store(-mediumMotor->get_position_rad() + deg2rad(90.0f));
-            mq3.store(smallMotor->get_position_rad());
+            mq1.store(bigMotor->getPositionRad() + (M_PI/2.0f) - deg2rad(BIG_OFFSET));
+            mq2.store(-mediumMotor->get_position_rad() - deg2rad(MEDIUM_OFFSET));
+            mq3.store(smallMotor->get_position_rad() - deg2rad(SMALL_OFFSET));
             DK(mq1.load(), mq2.load(), mq3.load(), _mx, _my, _mth);
             mx.store(_mx);
             my.store(_my);
