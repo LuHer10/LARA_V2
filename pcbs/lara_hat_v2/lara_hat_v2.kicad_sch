@@ -3798,6 +3798,12 @@
 		(uuid "149eaf13-8fa1-4ab1-b5bc-f33800f07d42")
 	)
 	(junction
+		(at 121.92 35.56)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "23e33502-4f84-4c98-bb80-33ce7b1f6976")
+	)
+	(junction
 		(at 212.09 27.94)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -3880,6 +3886,12 @@
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "b7d6159a-11c5-4eb0-aac5-2321a778d3d7")
+	)
+	(junction
+		(at 130.81 38.1)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "c75f5945-2d76-4a82-b64e-8283545809b7")
 	)
 	(junction
 		(at 157.48 58.42)
@@ -3966,6 +3978,16 @@
 			(type default)
 		)
 		(uuid "054c604c-c4f3-4870-854b-2b573e776376")
+	)
+	(wire
+		(pts
+			(xy 130.81 38.1) (xy 123.19 38.1)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "082ce33c-3eac-494c-9ba5-49bb11292937")
 	)
 	(wire
 		(pts
@@ -4209,6 +4231,16 @@
 	)
 	(wire
 		(pts
+			(xy 121.92 30.48) (xy 121.92 35.56)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "334b2a83-6cb7-43f6-a966-7df5c4f9bcef")
+	)
+	(wire
+		(pts
 			(xy 85.09 125.73) (xy 85.09 127)
 		)
 		(stroke
@@ -4379,7 +4411,7 @@
 	)
 	(wire
 		(pts
-			(xy 146.05 38.1) (xy 123.19 38.1)
+			(xy 146.05 38.1) (xy 130.81 38.1)
 		)
 		(stroke
 			(width 0)
@@ -4819,7 +4851,7 @@
 	)
 	(wire
 		(pts
-			(xy 120.65 35.56) (xy 146.05 35.56)
+			(xy 120.65 35.56) (xy 121.92 35.56)
 		)
 		(stroke
 			(width 0)
@@ -4919,6 +4951,16 @@
 	)
 	(wire
 		(pts
+			(xy 130.81 19.05) (xy 130.81 22.86)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "96fc9348-7735-42bd-acdc-0ba883788838")
+	)
+	(wire
+		(pts
 			(xy 172.72 140.97) (xy 165.1 140.97)
 		)
 		(stroke
@@ -4986,6 +5028,16 @@
 			(type default)
 		)
 		(uuid "9f295274-c5bf-437b-b127-f567bff39b64")
+	)
+	(wire
+		(pts
+			(xy 121.92 19.05) (xy 121.92 22.86)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "a1b892a4-4355-4f3a-92b6-b79e839a2678")
 	)
 	(wire
 		(pts
@@ -5079,6 +5131,16 @@
 	)
 	(wire
 		(pts
+			(xy 130.81 30.48) (xy 130.81 38.1)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "b2dd7768-83b6-4517-b888-ec5fe268e42c")
+	)
+	(wire
+		(pts
 			(xy 143.51 148.59) (xy 143.51 149.86)
 		)
 		(stroke
@@ -5106,6 +5168,16 @@
 			(type default)
 		)
 		(uuid "b629bbcf-640d-4639-94fa-4d0b1477faec")
+	)
+	(wire
+		(pts
+			(xy 121.92 35.56) (xy 146.05 35.56)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "b68a7752-4100-48a3-b01f-20bd772c6ecf")
 	)
 	(wire
 		(pts
@@ -7664,6 +7736,76 @@
 		)
 	)
 	(symbol
+		(lib_id "Device:R")
+		(at 121.92 26.67 180)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "6f8e020b-388d-4210-89c6-40d4ab133c33")
+		(property "Reference" "R6"
+			(at 124.46 25.3999 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Value" "4.7k"
+			(at 124.46 27.9399 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0805_2012Metric_Pad1.20x1.40mm_HandSolder"
+			(at 123.698 26.67 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 121.92 26.67 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 121.92 26.67 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "f95340c3-63d2-4eb7-bc60-de789fb5bd29")
+		)
+		(pin "2"
+			(uuid "89312c2f-dee2-425c-b175-05b3231dc319")
+		)
+		(instances
+			(project "lara_hat_v2"
+				(path "/439a50f9-54cc-4d05-be8a-2234828ed849"
+					(reference "R6")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "power:+3V3")
 		(at 134.62 59.69 0)
 		(unit 1)
@@ -7724,6 +7866,76 @@
 			(project ""
 				(path "/439a50f9-54cc-4d05-be8a-2234828ed849"
 					(reference "#PWR02")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 130.81 26.67 180)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "7a686c05-75f8-4276-83a6-a44558233235")
+		(property "Reference" "R7"
+			(at 133.35 25.3999 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Value" "4.7k"
+			(at 133.35 27.9399 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0805_2012Metric_Pad1.20x1.40mm_HandSolder"
+			(at 132.588 26.67 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 130.81 26.67 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 130.81 26.67 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "857a0c11-a231-4c69-a18c-07ea8e58fa68")
+		)
+		(pin "2"
+			(uuid "004d6bc0-af27-4d53-a0e7-2b4d4903b74f")
+		)
+		(instances
+			(project "lara_hat_v2"
+				(path "/439a50f9-54cc-4d05-be8a-2234828ed849"
+					(reference "R7")
 					(unit 1)
 				)
 			)
@@ -8143,6 +8355,72 @@
 			(project ""
 				(path "/439a50f9-54cc-4d05-be8a-2234828ed849"
 					(reference "J7")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:+3V3")
+		(at 130.81 19.05 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "9931ded3-ec9e-46e1-a241-f361941be4d3")
+		(property "Reference" "#PWR022"
+			(at 130.81 22.86 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "+3V3"
+			(at 130.81 13.97 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 130.81 19.05 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 130.81 19.05 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"+3V3\""
+			(at 130.81 19.05 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "a5629775-4519-486a-b968-72bfb22bbea2")
+		)
+		(instances
+			(project "lara_hat_v2"
+				(path "/439a50f9-54cc-4d05-be8a-2234828ed849"
+					(reference "#PWR022")
 					(unit 1)
 				)
 			)
@@ -8728,6 +9006,72 @@
 			(project ""
 				(path "/439a50f9-54cc-4d05-be8a-2234828ed849"
 					(reference "J1")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:+3V3")
+		(at 121.92 19.05 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "cae9f567-d57b-4316-94ff-b815e5eadbf6")
+		(property "Reference" "#PWR013"
+			(at 121.92 22.86 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "+3V3"
+			(at 121.92 13.97 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 121.92 19.05 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 121.92 19.05 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"+3V3\""
+			(at 121.92 19.05 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "b241ee57-a383-4c0a-90c6-3f0031104386")
+		)
+		(instances
+			(project "lara_hat_v2"
+				(path "/439a50f9-54cc-4d05-be8a-2234828ed849"
+					(reference "#PWR013")
 					(unit 1)
 				)
 			)
