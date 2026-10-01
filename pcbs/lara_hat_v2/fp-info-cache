@@ -1,4 +1,4 @@
-26734330655886817
+26736121494876061
 Audio_Module
 Reverb_BTDR-1H
 Digital Reverberation Unit, http://www.belton.co.kr/inc/downfile.php?seq=17&file=pdf (footprint from http://www.uk-electronic.de/PDF/BTDR-1.pdf)
@@ -70909,6 +70909,13 @@ module pcb
 0
 7
 7
+Molex_Ultra-Fit_Horizontal
+CONN_1723102000_02_MOL
+
+1723104202 
+0
+4
+4
 Motors
 Vybronics_VZ30C1T8219732L
 Vibration motor, 2.3-3.2V, 14000rpm, 0.7G, https://www.vybronics.com/wp-content/uploads/datasheet-files/Vybronics-VZ30C1T8219732L-datasheet.pdf
