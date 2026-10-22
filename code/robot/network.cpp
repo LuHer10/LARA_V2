@@ -64,7 +64,7 @@ ssize_t Network::receive(const char *buf)
     }
 }
 */
-
+/*
 void Network::receiveJoysticks(float &x_l, float &y_l, float &x_r, float &y_r, int8_t &grip)
 {
     ssize_t bytes_received = receive(buffer);
@@ -114,6 +114,72 @@ void Network::receiveJoysticks(float &x_l, float &y_l, float &x_r, float &y_r, i
         }
     }
 }
+*/
+
+void Network::receiveJoysticks(float &x_l, float &y_l, float &x_r, float &y_r,
+                               int8_t &dof_1, int8_t &dof_2, int8_t &dof_3,
+                               int8_t &mode)
+{
+    ssize_t bytes_received = receive(buffer);
+
+    if (bytes_received == EXPECTED_PACKET_SIZE && buffer[0] == HEADER_BYTE) {
+            float lx, ly, rx, ry;
+            int8_t dof1, dof2, dof3;
+            int8_t mod;
+
+            memcpy(&lx, &buffer[1],  sizeof(float));
+            memcpy(&ly, &buffer[5],  sizeof(float));
+            memcpy(&rx, &buffer[9],  sizeof(float));
+            memcpy(&ry, &buffer[13], sizeof(float));
+            memcpy(&dof1, &buffer[17], sizeof(int8_t));
+            memcpy(&dof2, &buffer[18], sizeof(int8_t));
+            memcpy(&dof3, &buffer[19], sizeof(int8_t));
+            memcpy(&mod, &buffer[20], sizeof(int8_t));
+            //printf("Received floats: lx=%.2f ly=%.2f rx=%.2f ry=%.2f\n", lx, ly, rx, ry);
+
+            x_l = lx;
+            y_l = ly;
+            x_r = rx;
+            y_r = ry;
+            mode = mod;
+            dof_1 = dof1;
+            dof_2 = dof2;
+            dof_3 = dof3;
+
+            if(dof3 < -1 || dof3 > 1) dof_3 = 0;
+
+            gettimeofday(&last_receive_time, NULL);
+            timeout_printed = 0;
+            client_known = 1;  // now we know where to send responses
+
+    } else{
+        if (errno != EWOULDBLOCK && errno != EAGAIN) {
+            perror("recvfrom failed");
+            return;
+        }
+
+        gettimeofday(&current_time, NULL);
+        long elapsed_sec = current_time.tv_sec - last_receive_time.tv_sec;
+        long elapsed_usec = current_time.tv_usec - last_receive_time.tv_usec;
+        if (elapsed_usec < 0) {
+            elapsed_sec--;
+            elapsed_usec += 1000000;
+        }
+
+        if (elapsed_sec >= TIMEOUT_SECONDS && !timeout_printed) {
+            printf("timeout\n");
+            timeout_printed = 1;
+            x_l = 0.0F;
+            y_l = 0.0F;
+            x_r = 0.0F;
+            y_r = 0.0F;
+            dof_1 = 0;
+            dof_2 = 0;
+            dof_3 = 0;
+        }
+    }
+}
+
 
 void Network::send(const char *buf)
 {

@@ -28,6 +28,8 @@ int main() {
     float q1, q2, q3;
     float arm_x, arm_y, arm_th;
 
+    int8_t d1, d2, d3;
+
     int8_t mode;
     int8_t grip = 0;
 
@@ -67,7 +69,10 @@ int main() {
         pre_x_right = x_right;
         pre_y_right = y_right;
 
-        net.receiveJoysticks(x_left, y_left, x_right, y_right, mode);
+        //net.receiveJoysticks(x_left, y_left, x_right, y_right, mode);
+        net.receiveJoysticks(x_left, y_left, x_right, y_right,
+                             d1, d2, d3,
+                             mode);
 
         pre_manual = manual;
 
