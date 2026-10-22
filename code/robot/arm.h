@@ -9,6 +9,8 @@
 #include <iostream>
 #include <atomic>
 
+#include "servo.h"
+
 #define BIG_ID 11
 #define MEDIUM_ID 2
 #define SMALL_ID 1
@@ -16,6 +18,14 @@
 #define BIG_OFFSET 2.0f
 #define MEDIUM_OFFSET -200.0f
 #define SMALL_OFFSET 190.0f
+
+
+#define GRIP_ID 50
+#define GRIPPER_OPEN  3.0f*M_PI/4.0f
+#define GRIPPER_CLOSE M_PI/2.0f
+
+
+#define WRIST_ID 10
 
 float deg2rad(float _deg)
 {
@@ -26,6 +36,9 @@ float deg2rad(float _deg)
 class Arm
 {
 private:
+
+    Servo servos;
+
     float l1, l2, l3;
 
     std::atomic<float> q1, q2, q3;
@@ -103,6 +116,9 @@ public:
 
         controlThread = std::thread(&Arm::motorControl, this);
 
+        servos.init();
+        servos.enableTorque(GRIP_ID);
+
     }
 
     ~Arm()
@@ -113,6 +129,9 @@ public:
         mediumMotor->stop_motor();
         smallMotor->stop_motor();
     }
+
+    void open(){servos.writePos(GRIP_ID, degToPos(135));}
+    void close(){servos.writePos(GRIP_ID, degToPos(90));}
 
 
     int IK(float _x, float _y, float _th, float& _q1, float& _q2, float& _q3)

@@ -22,17 +22,20 @@ int main()
     //servos.enableTorque(30);
     //servos.enableTorque(40);
     servos.enableTorque(1);
+    //servos.enableTorque(50);
 
     //servos.writePos(11, degToPos(90));
     //servos.writePos(40, 3500); //6700
     //servos.writePos(30, -500); //1655 -200
     
     
-    servos.writePos(1, degToPos(90));
+    //servos.writePos(50, degToPos(90));
+    servos.writePos(1, degToPos(150));
 
     sleep(2);
 
-    servos.writePos(1, degToPos(135));
+    servos.writePos(1, degToPos(180));
+    //servos.writePos(50, degToPos(135));
     
     sleep(2);
 
@@ -48,6 +51,7 @@ int main()
     //servos.disableTorque(11);
     //servos.disableTorque(30);
     //servos.disableTorque(40);
-    //servos.disableTorque(50);
+    servos.disableTorque(10);
+    servos.disableTorque(50);
 
 }
