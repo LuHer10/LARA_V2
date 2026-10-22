@@ -28,7 +28,8 @@
 
 #define PROTOCOL_VERSION  2.0
 
-#define DEVICENAME  "/dev/ttyAMA2"
+//#define DEVICENAME  "/dev/ttyAMA2"
+#define DEVICENAME  "/dev/ttyUSB0"
 
 #define TORQUE_ENABLE                   1
 #define TORQUE_DISABLE                  0
