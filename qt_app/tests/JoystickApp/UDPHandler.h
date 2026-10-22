@@ -10,10 +10,15 @@ class UDPHandler : public QObject
 public:
     explicit UDPHandler(QObject *parent = nullptr);
 
-    Q_INVOKABLE void sendJoystickData(float lx, float ly,
+    /*Q_INVOKABLE void sendJoystickData(float lx, float ly,
                                       float rx, float ry,
                                       int8_t grip);
+    */
 
+    Q_INVOKABLE void sendJoystickData(float lx, float ly,
+                                      float rx, float ry,
+                                      int8_t d1, int8_t d2, int8_t d3,
+                                      int8_t mode);
 
 signals:
     void dataReceived(QString data);
@@ -25,7 +30,7 @@ private:
     QUdpSocket senderSocket;
     QUdpSocket receiverSocket;
 
-    QHostAddress serverAddress = QHostAddress("192.168.253.100"); //QHostAddress("192.168.1.128"); //QHostAddress("192.168.1.43"); // Replace with your server IP
+    QHostAddress serverAddress = QHostAddress("192.168.0.101"); //QHostAddress("192.168.253.100"); //QHostAddress("192.168.1.128");  // Replace with your server IP
     quint16 sendPort = 40000;
     quint16 receivePort = 40001;
 };

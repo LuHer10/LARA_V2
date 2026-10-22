@@ -13,6 +13,7 @@ UDPHandler::UDPHandler(QObject *parent) : QObject(parent)
     senderSocket.writeDatagram(datagram, serverAddress, sendPort);
 }*/
 
+/*
 void UDPHandler::sendJoystickData(float lx, float ly, float rx, float ry, int8_t grip)
 {
     QByteArray datagram;
@@ -32,7 +33,31 @@ void UDPHandler::sendJoystickData(float lx, float ly, float rx, float ry, int8_t
 
     senderSocket.writeDatagram(datagram, serverAddress, sendPort);
 }
+*/
 
+void UDPHandler::sendJoystickData(float lx, float ly, float rx, float ry, int8_t d1, int8_t d2, int8_t d3,
+                                  int8_t mode)
+{
+    QByteArray datagram;
+    QDataStream stream(&datagram, QIODevice::WriteOnly);
+    stream.setByteOrder(QDataStream::LittleEndian); // Ensure consistent byte order
+
+    // Header byte
+    quint8 header = 0xAB;
+    stream << header;
+
+    // Append raw float values
+    stream.writeRawData(reinterpret_cast<const char*>(&lx), sizeof(float));
+    stream.writeRawData(reinterpret_cast<const char*>(&ly), sizeof(float));
+    stream.writeRawData(reinterpret_cast<const char*>(&rx), sizeof(float));
+    stream.writeRawData(reinterpret_cast<const char*>(&ry), sizeof(float));
+    stream.writeRawData(reinterpret_cast<const char*>(&d1), sizeof(int8_t));
+    stream.writeRawData(reinterpret_cast<const char*>(&d2), sizeof(int8_t));
+    stream.writeRawData(reinterpret_cast<const char*>(&d3), sizeof(int8_t));
+    stream.writeRawData(reinterpret_cast<const char*>(&mode), sizeof(int8_t));
+
+    senderSocket.writeDatagram(datagram, serverAddress, sendPort);
+}
 
 /*void UDPHandler::processPendingDatagrams()
 {
