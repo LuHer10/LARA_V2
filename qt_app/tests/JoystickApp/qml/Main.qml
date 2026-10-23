@@ -16,7 +16,7 @@ Window {
     property real rightX: 0
     property real rightY: 0
     property int gripEnabled: 0
-    property int gripDown: 0
+    property int omni: 0
     property int manualOn: 0
 
     property int currentScreen: 0
@@ -220,7 +220,7 @@ Window {
             }
 
             Button {
-                id: tiltButton
+                id: omniButton
                 width: 100
                 height: 50
 
@@ -230,10 +230,10 @@ Window {
                 anchors.bottomMargin: 10
 
                 checkable: true
-                text: checked ? "Front" : "Down"
+                text: checked ? "Diff" : "Omni"
 
                 onCheckedChanged: {
-                    gripDown = checked
+                    omni = checked
                 }
             }
         }
@@ -308,7 +308,7 @@ Window {
         running: true
         onTriggered: {
             udpHandler.sendJoystickData(leftX, -leftY, rightX, -rightY, dof1, dof2, dof3,
-                                        currentScreen << 2 | gripDown << 1 | gripEnabled)
+                                        currentScreen << 2 | omni << 1 | gripEnabled)
         }
     }
 

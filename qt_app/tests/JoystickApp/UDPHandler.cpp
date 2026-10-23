@@ -86,7 +86,7 @@ void UDPHandler::processPendingDatagrams()
         quint8 header;
         in >> header;
         if (header != 0xAB) {
-            qWarning() << "Invalid header byte. Discarding packet.";
+            //qWarning() << "Invalid header byte. Discarding packet.";
             return;
         }
 

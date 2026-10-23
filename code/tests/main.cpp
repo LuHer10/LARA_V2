@@ -32,6 +32,7 @@ int main() {
 
     int8_t mode;
     int8_t grip = 0;
+    int8_t omni = 0;
 
     int manual = 0;
     int pre_manual = manual;
@@ -77,6 +78,7 @@ int main() {
         pre_manual = manual;
 
         manual = mode >> 2;
+        omni = (mode >> 1) & 0x01;
 
         base.readEncoders();
 
@@ -95,27 +97,29 @@ int main() {
 
         if(changed)
         {
-            //if(arm_x > 0.7f || arm_x < 0.3f)
-            //{
-                base.setVelocity(x_left*5.0f, y_left*5.0f, 0/*-x_right*/);
+            if(omni)
+            {
+                base.setVelocity(x_left*5.0f, y_left*5.0f, -x_right*5.0f);
                 base.sendSpeed();
-                //arm.moveIncr(0.0f, y_right*0.1f, 0.0f);
-            //}
-            //else
-            //{
-                //arm.moveIncr(y_left*0.1f, y_right*0.1f, 0.0f);
-            //}
-
+            }
+            else
+            {
+                base.setVelocity(0.0f /*x_left*5.0f*/, y_left*5.0f, -x_left*5.0f);
+                base.sendSpeed();
+            }
             
         }
 
-        if(!manual)
+        if(!omni)
         {
-            if(x_right || y_right)
-                arm.moveCoordIncr(x_right*0.0001f, y_right*0.0001f, 0.0f);
-        }
-        else {
-            arm.moveQs_incr(0.01f*d1, 0.01f*d2, 0.01*d3);
+            if(!manual)
+            {
+                if(x_right || y_right)
+                    arm.moveCoordIncr(x_right*0.0001f, y_right*0.0001f, 0.0f);
+            }
+            else {
+                arm.moveQs_incr(0.01f*d1, 0.01f*d2, 0.01*d3);
+            }
         }
 
         if(pre_manual != manual && !manual)
