@@ -8,11 +8,11 @@
 #define DEVICE "/dev/ttyAMA0"
 
 #define QPPR 1300 // Quadrature Pulses Per Revolution
-#define WHEEL_DIAMETER 0.06F // Wheel diameter in meters
+#define WHEEL_DIAMETER 0.127F // Wheel diameter in meters
 constexpr float WHEEL_RADIUS = WHEEL_DIAMETER/2.0F;
 #define MAX_RPM 330 
-#define LENGTH 0.323F
-#define WIDTH 0.3F
+#define LENGTH 0.320F
+#define WIDTH 0.3398F
 #define PI 3.14159F
 
 constexpr float LX = LENGTH/2.0F;
