@@ -244,7 +244,7 @@ public:
         //DK();
     }
 
-    int setOffset()
+    void setOffset()
     {
         //mBigRaw.store(bigMotor->getPositionRad() + (M_PI/2.0f));
         //mMedRaw.store(-mediumMotor->get_position_rad());
@@ -254,7 +254,7 @@ public:
         smallOffset.store(mSmaRaw.load() - deg2rad(180.0f));
     }
 
-    int home()
+    void home()
     {
         q1.store(deg2rad(90.0f));
         q2.store(deg2rad(90.0f));
