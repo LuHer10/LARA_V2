@@ -16,7 +16,7 @@
 #define SMALL_ID 1
 
 #define BIG_OFFSET 2.0f
-#define MEDIUM_OFFSET -200.0f
+#define MEDIUM_OFFSET 200.0f
 #define SMALL_OFFSET 190.0f
 
 
@@ -70,7 +70,7 @@ private:
         {
             if(stopThread) break;
             bigMotor->pos_ctrl_red_rad(q1.load() - (M_PI/2.0f) + deg2rad(bigOffset.load()));
-            mediumMotor->pos_control_rad(-q2.load() + deg2rad(mediumOffset.load()));
+            mediumMotor->pos_control_rad(-(q2.load() + deg2rad(mediumOffset.load())));
             smallMotor->pos_control_rad(q3.load() + deg2rad(smallOffset.load()));   
             std::this_thread::sleep_for(std::chrono::milliseconds(10)); 
             //mq1.store(bigMotor->getPositionRad() + (M_PI/2.0f) - deg2rad(bigOffset));
@@ -80,7 +80,7 @@ private:
             mMedRaw.store(-mediumMotor->get_position_rad());
             mSmaRaw.store(smallMotor->get_position_rad());
             mq1.store(mBigRaw.load() - deg2rad(bigOffset.load()));
-            mq2.store(mMedRaw.load() - deg2rad(mediumOffset.load()));
+            mq2.store(mMedRaw.load() + deg2rad(mediumOffset.load()));
             mq3.store(mSmaRaw.load() - deg2rad(smallOffset.load()));
             DK(mq1.load(), mq2.load(), mq3.load(), _mx, _my, _mth);
             mx.store(_mx);
@@ -241,10 +241,14 @@ public:
         q1.store(q1.load() + dq1);
         q2.store(q2.load() + dq2);
         q3.store(q3.load() + dq3);
+        //DK();
     }
 
     int setOffset()
     {
+        //mBigRaw.store(bigMotor->getPositionRad() + (M_PI/2.0f));
+        //mMedRaw.store(-mediumMotor->get_position_rad());
+        //mSmaRaw.store(smallMotor->get_position_rad());
         bigOffset.store(mBigRaw.load() - deg2rad(90.0f));
         mediumOffset.store(mMedRaw.load() - deg2rad(90.0f));
         smallOffset.store(mSmaRaw.load() - deg2rad(180.0f));
@@ -255,6 +259,7 @@ public:
         q1.store(deg2rad(90.0f));
         q2.store(deg2rad(90.0f));
         q3.store(deg2rad(180.0f));
+        //DK();
     }
     
 };
