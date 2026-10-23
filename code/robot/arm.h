@@ -141,7 +141,7 @@ public:
         float wl = sqrt(wx*wx + wy*wy);
 
         float q_2 = acos((l1*l1 + l2*l2 - wx*wx - wy*wy)/(2.0f * l1 * l2));
-        float q_1 = atan2(wy, wx) + asin((l2 * sin(q_2))/sqrt(wx*wx + wy*wy));
+        float q_1 = atan2(wy, wx) + asin((l2 * sin(q_2))/wl);
 
         if(isnan(q_1) || isnan(q_2)) return 1;
 
