@@ -151,7 +151,7 @@ Window {
                     width: joystickSize / 3
                     height: joystickSize / 3
                     radius: joystickSize / 6
-                    color: "#FF4444"
+                    color: omni ? "#FF4444" : "#FF6644"
                     x: rightJoystick.width / 2 - width / 2
                     y: rightJoystick.height / 2 - height / 2
                 }
@@ -195,7 +195,7 @@ Window {
 
                 Text {
                     anchors.centerIn: parent
-                    text: "rotation"
+                    text: omni ? "rotation" : "arm"
                     color: "white"
                 }
 
@@ -257,6 +257,7 @@ Window {
                             text: "DOF " + (index + 1)
                             font.pixelSize: 20
                             Layout.alignment: Qt.AlignHCenter
+                            color: "black"
                         }
 
                         Button {
