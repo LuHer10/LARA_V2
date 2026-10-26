@@ -6,9 +6,10 @@
 #include <unistd.h>
 #include <stdint.h>
 #include <iostream>
+#include <stdio.h>
 
-#define FRONT_ADDRESS 0x80
-#define BACK_ADDRESS  0x81
+#define FRONT_ADDRESS 128
+#define BACK_ADDRESS  135
 #define DEFAULT_PORT "/dev/ttyAMA0"
 #define DEFAULT_BAUDS B38400
 
@@ -58,6 +59,7 @@ public:
         if (fd == -1)
             perror("openSerialPort: Unable to open port");
 
+        
         struct termios options{};
         tcgetattr(fd, &options);
         cfsetispeed(&options, _baudRate);
@@ -72,6 +74,7 @@ public:
         options.c_iflag &= ~(IXON | IXOFF | IXANY);
         options.c_oflag &= ~OPOST;
         tcsetattr(fd, TCSANOW, &options);
+        printf("Serial port open\n");
 
     }
 

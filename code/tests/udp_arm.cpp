@@ -3,21 +3,22 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <cmath>
 
 //#include "../robot/base.h"
 #include "../robot/network.h"
-#include "../robot/arm.h"
+//#include "../robot/arm.h"
 
 
 int main() {
 
-    SocketCAN can("can0");
+    /*SocketCAN can("can0");
     if (!can.open()) {
         std::cerr << "Failed to open CAN\n";
         return 1;
     }
     can.setNonBlocking(true);
-
+*/
     Network net;
     
     float x_left = 0.0F;
@@ -52,9 +53,9 @@ int main() {
     float l2 = 0.33f;
     float l3 = 0.1f;
 
-    Arm arm(&can, l1, l2, l3);
-    arm.getCoord(arm_x, arm_y, arm_th);
-    arm.getQs(q1, q2, q3);
+  //  Arm arm(&can, l1, l2, l3);
+    //arm.getCoord(arm_x, arm_y, arm_th);
+    //arm.getQs(q1, q2, q3);
     
     
     //base.readEncoders();
@@ -83,10 +84,11 @@ int main() {
         //odo = base.getOdometry();
 
         //net.sendOdometry(odo.x, odo.y, odo.ang);
+        net.sendOdometry(1.0f, 2.0f, 3.0f);
 
-        arm.getQs(q1, q2, q3);
-        arm.DK(q1, q2, q3, arm_x, arm_y, arm_th);
-        arm.getCoord(arm_x, arm_y, arm_th);
+        //arm.getQs(q1, q2, q3);
+        //arm.DK(q1, q2, q3, arm_x, arm_y, arm_th);
+        //arm.getCoord(arm_x, arm_y, arm_th);
 
         changed = (pre_x_left != x_left)
                 || (pre_y_left != y_left)
@@ -111,8 +113,8 @@ int main() {
 
         if(x_right || y_right)
         {
-            if(manual == 0)
-                arm.moveCoordIncr(x_right*0.0001f, y_right*0.0001f, 0.0f);
+            if(manual == 0);
+        //        arm.moveCoordIncr(x_right*0.0001f, y_right*0.0001f, 0.0f);
             if(manual == 1)
             {
                 //arm.move_q1(PI/2.0f);
@@ -141,7 +143,7 @@ int main() {
         */
 
         printf("%f, %f, %f      ", q1*180.0f/M_PI, q2*180.0f/M_PI, q3*180.0f/M_PI);
-        printf("%f, %f, %f, %d  \n", arm_x, arm_y, arm_th, mode);
+        printf("%f, %f, %f, %d  \n", x_left, arm_y, arm_th, mode);
 
         //printf("%f, %f, %f, %f, %d \n", x_left, y_left, x_right, y_right, grip);
 

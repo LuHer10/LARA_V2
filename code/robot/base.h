@@ -4,7 +4,8 @@
 #include "roboclaw.h"
 #include <cmath>
 
-#define BAUD_RATE B38400
+//#define BAUD_RATE B38400
+#define BAUD_RATE B115200
 #define DEVICE "/dev/ttyAMA0"
 
 #define QPPR 1300 // Quadrature Pulses Per Revolution
@@ -61,7 +62,7 @@ public:
 
     Base()
     {
-        roboclaw.resetEncoders(FRONT_ADDRESS);
+        roboclaw.resetEncoders(FRONT_ADDRESS);   
         roboclaw.resetEncoders(BACK_ADDRESS);
         roboclaw.M1M2Speed(FRONT_ADDRESS, 0, 0);
         roboclaw.M1M2Speed(BACK_ADDRESS, 0, 0);

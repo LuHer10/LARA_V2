@@ -207,6 +207,7 @@ bool RoboClaw::resetEncoders(uint8_t address)
     write(fd, packet, 4);
     tcdrain(fd);
     uint8_t recv;
+    printf("Waiting for address %d", address);
     read(fd, &recv, 1);
     if(recv == 0xFF) return true;
     return false;
