@@ -29,6 +29,7 @@ int main() {
     float q1, q2, q3;
     float arm_x, arm_y, arm_th;
 
+    // estas variables no se lo que son
     int8_t d1, d2, d3;
 
     int8_t mode;
@@ -58,8 +59,9 @@ int main() {
     //arm.getCoord(arm_x, arm_y, arm_th);
     //arm.getQs(q1, q2, q3);
     
-    
+    std::cout << "YUJU1" << std::endl;
     base.readEncoders();
+    std::cout << "YUJU2" << std::endl;
     odo = base.getOdometry();
 
     //arm.open();
@@ -79,7 +81,7 @@ int main() {
         pre_manual = manual;
 
         manual = mode >> 2;
-        //omni = (mode >> 1) & 0x01;
+        omni = (mode >> 1) & 0x01;
 
         base.readEncoders();
 
@@ -87,7 +89,7 @@ int main() {
 
        net.sendOdometry(odo.x, odo.y, odo.ang);
 
-      //  arm.getQs(q1, q2, q3);
+        //arm.getQs(q1, q2, q3);
         //arm.DK(q1, q2, q3, arm_x, arm_y, arm_th);
         //arm.getCoord(arm_x, arm_y, arm_th);
 
@@ -96,18 +98,26 @@ int main() {
                 || (pre_x_right != x_right)
                 || (pre_y_right != y_right);
 
+        //changed = 1;
+        //x_left = 0;
+        printf("Xdir Ydir Rotx Roty :%f %f %f %f\n", x_left, y_left, x_right, y_right);
         if(changed)
         {
- //           if(omni)
-  //          {
-                base.setVelocity(x_left*5.0f, y_left*5.0f, -x_right*5.0f);
+            if(omni)
+            {
+                // left y right se refiere a los indicadores de la app de Lucas 
+                // X en la ap es el eje horizontal
+                // Y en la ap es el eje vertical
+                base.setVelocity(x_left*5.0f, y_left*5.0f, -x_right*10.0f);
+                //base.setVelocity(0.0f, 0.0f, 0.0f);
                 base.sendSpeed();
-   //         }
-    //        else
-    //        {
-//                base.setVelocity(0.0f , y_left*5.0f, -x_left*5.0f);
-//                base.sendSpeed();
-    //        }
+                
+            }
+            else
+            {
+                base.setVelocity(0.0f , y_left*5.0f, -x_left*10.0f);
+                base.sendSpeed();
+            }
             
         }
 /*
@@ -140,9 +150,9 @@ int main() {
             //arm.open();
         }
 
-        printf("%f, %f, %f      ", q1*180.0f/M_PI, q2*180.0f/M_PI, q3*180.0f/M_PI);
-        printf("%f, %f, %f, %d     ", x_left, arm_y, arm_th, manual);
-        printf("%d, %d, %d  \n", d1, d2, d3);
+        printf("Brazo motores: %f, %f, %f \n", q1*180.0f/M_PI, q2*180.0f/M_PI, q3*180.0f/M_PI);
+        printf("Brazo X Y theta: %f, %f, %f, %d \n", x_left, arm_y, arm_th, manual);
+        printf("Esto??: %d, %d, %d  \n", d1, d2, d3);
 
         //printf("%f, %f, %f, %f, %d \n", x_left, y_left, x_right, y_right, grip);
 

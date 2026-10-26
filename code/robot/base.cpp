@@ -9,10 +9,16 @@ inline void Base::FK(const float vm[4], float &vx, float &vy, float &vrad)
 
 inline void Base::IK(const float &vx, const float &vy, const float &vrad, float vm[4])
 {
-    vm[0] = ( vx + vy - vrad*LXY) /* WHEEL_RADIUS*/;
-    vm[1] = (-vx + vy + vrad*LXY) /* WHEEL_RADIUS*/;
+    // Cambiado por David (motor 0 por motor 1) 
+    // porque ruedas delanteras están cableadas al revés
+    vm[1] = ( vx + vy - vrad*LXY) /* WHEEL_RADIUS*/;
+    vm[0] = (-vx + vy + vrad*LXY) /* WHEEL_RADIUS*/;
     vm[2] = (-vx + vy - vrad*LXY) /* WHEEL_RADIUS*/;
     vm[3] = ( vx + vy + vrad*LXY) /* WHEEL_RADIUS*/;
+    //vm[0] = 0;
+    //vm[1] = 0;
+    //vm[2] = 0;
+    //vm[3] = 0;
 }
 
 void Base::setVelocity(float vx, float vy, float vrad)
@@ -39,7 +45,7 @@ void Base::readEncoders()
     bool front, back;
     front = roboclaw.readEncoders(FRONT_ADDRESS, encs[M_FRONT_LEFT].t_uint, encs[M_FRONT_RIGHT].t_uint);
     back  = roboclaw.readEncoders( BACK_ADDRESS, encs[M_BACK_LEFT].t_uint,  encs[M_BACK_RIGHT].t_uint);
-
+            
     if(front && back)
     {
         for(int i = 0; i < 4; i++)
@@ -55,8 +61,10 @@ void Base::readEncoders()
         x += (-d_xr * cos(ang + d_ang/2) + d_yr * sin(ang + d_ang/2));
         y +=  (d_xr * sin(ang + d_ang/2) + d_yr * cos(ang + d_ang/2));
         ang += d_ang;
-
+        
+        std::cout << "Odom: " << x << " " << y << " " << ang << std::endl;
     }
+    
 }
 
 void Base::readSpeeds()

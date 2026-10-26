@@ -11,7 +11,8 @@
 #define FRONT_ADDRESS 128
 #define BACK_ADDRESS  135
 #define DEFAULT_PORT "/dev/ttyAMA0"
-#define DEFAULT_BAUDS B38400
+//#define DEFAULT_BAUDS B38400
+#define DEFAULT_BAUDS B115200
 
 
 enum commands:uint8_t{
