@@ -146,13 +146,14 @@ int main() {
 
         grip = mode & 0x01;
 
-        if(mode & 0x01)
+        if(grip)
         {
-            arm.close();
+            arm.open();
         }
         else
         {
-            arm.open();
+            arm.close();
+            
         }
 
         //arm.moveWristIncr(d4);
