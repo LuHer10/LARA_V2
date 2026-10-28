@@ -117,7 +117,7 @@ void Network::receiveJoysticks(float &x_l, float &y_l, float &x_r, float &y_r, i
 */
 
 void Network::receiveJoysticks(float &x_l, float &y_l, float &x_r, float &y_r,
-                               int8_t &dof_1, int8_t &dof_2, int8_t &dof_3, int8_t &dof_3,
+                               int8_t &dof_1, int8_t &dof_2, int8_t &dof_3, int8_t &dof_4,
                                int8_t &mode)
 {
     ssize_t bytes_received = receive(buffer);

@@ -71,23 +71,23 @@ private:
         while(true)
         {
             if(stopThread) break;
-            bigMotor->pos_ctrl_red_rad(q1.load() - (M_PI/2.0f) + deg2rad(bigOffset.load()));
-            mediumMotor->pos_control_rad(-(q2.load() + deg2rad(mediumOffset.load())));
-            smallMotor->pos_control_rad(q3.load() + deg2rad(smallOffset.load()));   
+            
+
+            bigMotor->pos_ctrl_red_rad(q1.load());
+            mediumMotor->pos_control_rad((q2.load()));
+            smallMotor->pos_control_rad(q3.load());   
             std::this_thread::sleep_for(std::chrono::milliseconds(10)); 
             //mq1.store(bigMotor->getPositionRad() + (M_PI/2.0f) - deg2rad(bigOffset));
             //mq2.store(-mediumMotor->get_position_rad() - deg2rad(mediumOffset));
             //mq3.store(smallMotor->get_position_rad() - deg2rad(smallOffset));
-            mBigRaw.store(bigMotor->getPositionRad() + (M_PI/2.0f));
-            mMedRaw.store(-mediumMotor->get_position_rad());
-            mSmaRaw.store(smallMotor->get_position_rad());
-            mq1.store(mBigRaw.load() - deg2rad(bigOffset.load()));
-            mq2.store(mMedRaw.load() + deg2rad(mediumOffset.load()));
-            mq3.store(mSmaRaw.load() - deg2rad(smallOffset.load()));
-            DK(mq1.load(), mq2.load(), mq3.load(), _mx, _my, _mth);
-            mx.store(_mx);
-            my.store(_my);
-            mth.store(_mth);
+            
+            //mq1.store(mBigRaw.load() - deg2rad(bigOffset.load()));
+            //mq2.store(mMedRaw.load() + deg2rad(mediumOffset.load()));
+            //mq3.store(mSmaRaw.load() - deg2rad(smallOffset.load()));
+            //DK(mq1.load(), mq2.load(), mq3.load(), _mx, _my, _mth);
+            //mx.store(_mx);
+            //my.store(_my);
+            //mth.store(_mth);
             std::this_thread::sleep_for(std::chrono::milliseconds(10)); 
         }
         std::cout << "Motor control inactive\n";
@@ -104,6 +104,9 @@ public:
         bigMotor->start_motor();
         mediumMotor->start_motor();
         smallMotor->start_motor();
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
         bigMotor->setTrapezodialMode();
 
         l1 = _l1;
@@ -114,12 +117,26 @@ public:
         y.store(l1);
         th.store(0.0f);
 
-        IK();
+        //IK();
+
+        mBigRaw.store(bigMotor->getPositionRad());
+        mMedRaw.store(mediumMotor->get_position_rad());
+        mSmaRaw.store(smallMotor->get_position_rad());
+
+
+        q1.store(mBigRaw.load());
+        q2.store(mMedRaw.load());
+        q3.store(mSmaRaw.load());
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
         controlThread = std::thread(&Arm::motorControl, this);
 
         servos.init();
         servos.enableTorque(GRIP_ID);
+
+        
+
 
     }
 
@@ -132,8 +149,8 @@ public:
         smallMotor->stop_motor();
     }
 
-    void open(){servos.writePos(GRIP_ID, degToPos(135));}
-    void close(){servos.writePos(GRIP_ID, degToPos(90));}
+    void open(){servos.writePos(GRIP_ID, degToPos(230));}
+    void close(){servos.writePos(GRIP_ID, degToPos(170));}
     void moveWristIncr(int dir)
     {
         if(dir != 0)
@@ -271,6 +288,8 @@ public:
         q3.store(deg2rad(180.0f));
         //DK();
     }
+
+    
     
 };
 

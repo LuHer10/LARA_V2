@@ -32,7 +32,7 @@ set_target_properties(dynamixel_sdk PROPERTIES
 add_subdirectory(../robot ${CMAKE_BINARY_DIR}/robot_build)
 
 # Get all .cpp test files in this directory
-file(GLOB TEST_SOURCES CONFIGURE_DEPENDS *.cpp)
+file(GLOB TEST_SOURCES CONFIGURE_DEPENDS main.cpp)
 
 foreach(test_src ${TEST_SOURCES})
     # Get the file name without the directory or extension

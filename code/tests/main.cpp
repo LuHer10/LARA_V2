@@ -7,18 +7,18 @@
 
 #include "../robot/base.h"
 #include "../robot/network.h"
-//#include "../robot/arm.h"
+#include "../robot/arm.h"
 
 
 int main() {
 
-    /*SocketCAN can("can0");
+    SocketCAN can("can0");
     if (!can.open()) {
         std::cerr << "Failed to open CAN\n";
-        return 1;
+        //return 1;
     }
     can.setNonBlocking(true);
-*/
+
     Network net;
     
     float x_left = 0.0F;
@@ -57,9 +57,9 @@ int main() {
     float l2 = 0.33f;
     float l3 = 0.1f;
 
-    //Arm arm(&can, l1, l2, l3);
-    //arm.getCoord(arm_x, arm_y, arm_th);
-    //arm.getQs(q1, q2, q3);
+    Arm arm(&can, l1, l2, l3);
+    arm.getCoord(arm_x, arm_y, arm_th);
+    arm.getQs(q1, q2, q3);
     
     std::cout << "YUJU1" << std::endl;
     base.readEncoders();
@@ -91,9 +91,9 @@ int main() {
 
        net.sendOdometry(odo.x, odo.y, odo.ang);
 
-        //arm.getQs(q1, q2, q3);
-        //arm.DK(q1, q2, q3, arm_x, arm_y, arm_th);
-        //arm.getCoord(arm_x, arm_y, arm_th);
+        arm.getQs(q1, q2, q3);
+        arm.DK(q1, q2, q3, arm_x, arm_y, arm_th);
+        arm.getCoord(arm_x, arm_y, arm_th);
 
         changed = (pre_x_left != x_left)
                 || (pre_y_left != y_left)
@@ -122,9 +122,12 @@ int main() {
             }
             
         }
-/*
-        if(!omni)
-        {
+
+        //arm.moveCoordIncr(x_right*0.001f, y_right*0.001f, 0.0f);
+        arm.moveQs_incr(0.01f*d1, 0.01f*d2, 0.01*d3);
+
+        //if(!omni)
+        //{
             if(!manual)
             {
                 if(x_right || y_right){}
@@ -133,8 +136,8 @@ int main() {
             else {
                 //arm.moveQs_incr(0.01f*d1, 0.01f*d2, 0.01*d3);
             }
-        }
-*/
+        //}
+
         if(pre_home != home && home)
         {
             //arm.setOffset();
@@ -145,11 +148,11 @@ int main() {
 
         if(mode & 0x01)
         {
-            //arm.close();
+            arm.close();
         }
         else
         {
-            //arm.open();
+            arm.open();
         }
 
         //arm.moveWristIncr(d4);

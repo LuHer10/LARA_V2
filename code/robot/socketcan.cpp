@@ -11,7 +11,10 @@
 #include <errno.h>
 
 SocketCAN::SocketCAN(const std::string& interface)
-    : interface_(interface), socket_(-1), is_open_(false), is_non_blocking_(false) {}
+    : interface_(interface), socket_(-1), is_open_(false), is_non_blocking_(false) 
+    {
+        //setNonBlocking(is_non_blocking_);
+    }
 
 SocketCAN::~SocketCAN() {
     close();
@@ -80,7 +83,7 @@ bool SocketCAN::sendFrame(const struct can_frame& frame) {
             // Would block → not an error in non-blocking mode
             return false;
         }
-        perror("write");
+        //perror("write");
         return false;
     }
 
@@ -98,7 +101,7 @@ bool SocketCAN::receiveFrame(struct can_frame& frame) {
             // No data available right now
             return false;
         }
-        perror("read");
+        //perror("read");
         return false;
     }
 
