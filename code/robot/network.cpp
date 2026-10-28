@@ -117,14 +117,14 @@ void Network::receiveJoysticks(float &x_l, float &y_l, float &x_r, float &y_r, i
 */
 
 void Network::receiveJoysticks(float &x_l, float &y_l, float &x_r, float &y_r,
-                               int8_t &dof_1, int8_t &dof_2, int8_t &dof_3,
+                               int8_t &dof_1, int8_t &dof_2, int8_t &dof_3, int8_t &dof_3,
                                int8_t &mode)
 {
     ssize_t bytes_received = receive(buffer);
 
     if (bytes_received == EXPECTED_PACKET_SIZE && buffer[0] == HEADER_BYTE) {
             float lx, ly, rx, ry;
-            int8_t dof1, dof2, dof3;
+            int8_t dof1, dof2, dof3, dof4;
             int8_t mod;
 
             memcpy(&lx, &buffer[1],  sizeof(float));
@@ -134,7 +134,8 @@ void Network::receiveJoysticks(float &x_l, float &y_l, float &x_r, float &y_r,
             memcpy(&dof1, &buffer[17], sizeof(int8_t));
             memcpy(&dof2, &buffer[18], sizeof(int8_t));
             memcpy(&dof3, &buffer[19], sizeof(int8_t));
-            memcpy(&mod, &buffer[20], sizeof(int8_t));
+            memcpy(&dof4, &buffer[20], sizeof(int8_t));
+            memcpy(&mod, &buffer[21], sizeof(int8_t));
             //printf("Received floats: lx=%.2f ly=%.2f rx=%.2f ry=%.2f\n", lx, ly, rx, ry);
 
             x_l = lx;
@@ -145,6 +146,7 @@ void Network::receiveJoysticks(float &x_l, float &y_l, float &x_r, float &y_r,
             dof_1 = dof1;
             dof_2 = dof2;
             dof_3 = dof3;
+            dof_4 = dof4;
 
             if(dof3 < -1 || dof3 > 1) dof_3 = 0;
 
@@ -176,6 +178,7 @@ void Network::receiveJoysticks(float &x_l, float &y_l, float &x_r, float &y_r,
             dof_1 = 0;
             dof_2 = 0;
             dof_3 = 0;
+            dof_4 = 0;
         }
     }
 }

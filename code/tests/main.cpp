@@ -30,14 +30,16 @@ int main() {
     float arm_x, arm_y, arm_th;
 
     // estas variables no se lo que son
-    int8_t d1, d2, d3;
+    int8_t d1, d2, d3, d4;
 
     int8_t mode;
     int8_t grip = 0;
     int8_t omni = 0;
 
+    int home = 0;
+    int pre_home = home;
+
     int manual = 0;
-    int pre_manual = manual;
 
     float q2off = 0;
     float q3off = 0;
@@ -75,12 +77,12 @@ int main() {
 
         //net.receiveJoysticks(x_left, y_left, x_right, y_right, mode);
         net.receiveJoysticks(x_left, y_left, x_right, y_right,
-                             d1, d2, d3,
+                             d1, d2, d3, d4,
                              mode);
 
-        pre_manual = manual;
+        pre_home = home;
 
-        manual = mode >> 2;
+        home = (mode >> 2) & 0x01;
         omni = (mode >> 1) & 0x01;
 
         base.readEncoders();
@@ -133,7 +135,7 @@ int main() {
             }
         }
 */
-        if(pre_manual != manual && !manual)
+        if(pre_home != home && home)
         {
             //arm.setOffset();
             //arm.home();
@@ -149,6 +151,8 @@ int main() {
         {
             //arm.open();
         }
+
+        //arm.moveWristIncr(d4);
 
         printf("Brazo motores: %f, %f, %f \n", q1*180.0f/M_PI, q2*180.0f/M_PI, q3*180.0f/M_PI);
         printf("Brazo X Y theta: %f, %f, %f, %d \n", x_left, arm_y, arm_th, manual);

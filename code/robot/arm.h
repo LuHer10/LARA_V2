@@ -41,6 +41,8 @@ private:
 
     float l1, l2, l3;
 
+    float wristAngle = 0.0f;
+
     std::atomic<float> q1, q2, q3;
     std::atomic<float> x, y, th;
 
@@ -132,6 +134,14 @@ public:
 
     void open(){servos.writePos(GRIP_ID, degToPos(135));}
     void close(){servos.writePos(GRIP_ID, degToPos(90));}
+    void moveWristIncr(int dir)
+    {
+        if(dir != 0)
+        {
+            wristAngle += dir*0.5f;
+            servos.writePos(WRIST_ID, degToPos(wristAngle));
+        }
+    }
 
 
     int IK(float _x, float _y, float _th, float& _q1, float& _q2, float& _q3)
