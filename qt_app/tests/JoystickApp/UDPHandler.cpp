@@ -35,7 +35,7 @@ void UDPHandler::sendJoystickData(float lx, float ly, float rx, float ry, int8_t
 }
 */
 
-void UDPHandler::sendJoystickData(float lx, float ly, float rx, float ry, int8_t d1, int8_t d2, int8_t d3,
+void UDPHandler::sendJoystickData(float lx, float ly, float rx, float ry, int8_t d1, int8_t d2, int8_t d3, int8_t d4,
                                   int8_t mode)
 {
     QByteArray datagram;
@@ -54,6 +54,7 @@ void UDPHandler::sendJoystickData(float lx, float ly, float rx, float ry, int8_t
     stream.writeRawData(reinterpret_cast<const char*>(&d1), sizeof(int8_t));
     stream.writeRawData(reinterpret_cast<const char*>(&d2), sizeof(int8_t));
     stream.writeRawData(reinterpret_cast<const char*>(&d3), sizeof(int8_t));
+    stream.writeRawData(reinterpret_cast<const char*>(&d4), sizeof(int8_t));
     stream.writeRawData(reinterpret_cast<const char*>(&mode), sizeof(int8_t));
 
     senderSocket.writeDatagram(datagram, serverAddress, sendPort);

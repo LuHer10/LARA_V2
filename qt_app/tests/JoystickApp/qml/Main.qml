@@ -25,6 +25,9 @@ Window {
     property int dof1: 0
     property int dof2: 0
     property int dof3: 0
+    property int dof4: 0
+
+    property int home: 0
 
     Button {
             id: screenButton
@@ -236,6 +239,7 @@ Window {
                     omni = checked
                 }
             }
+
         }
 
         // SCREEN 2: Three DOF controls
@@ -247,8 +251,9 @@ Window {
                 anchors.centerIn: parent
                 spacing: 40
 
+
                 Repeater {
-                    model: 3
+                    model: 4
 
                     delegate: ColumnLayout {
                         spacing: 10
@@ -268,13 +273,22 @@ Window {
                             onPressed: {
                                 if (index === 0) dof1 = 1
                                 else if (index === 1) dof2 = 1
-                                else dof3 = 1
+                                else if (index === 2) dof3 = 1
+                                else if (index === 3) dof4 = 1
                             }
 
                             onReleased: {
                                 if (index === 0) dof1 = 0
                                 else if (index === 1) dof2 = 0
-                                else dof3 = 0
+                                else if (index === 2) dof3 = 0
+                                else if (index === 3) dof4 = 0
+                            }
+
+                            onCanceled: {
+                                if (index === 0) dof1 = 0
+                                else if (index === 1) dof2 = 0
+                                else if (index === 2) dof3 = 0
+                                else if (index === 3) dof4 = 0
                             }
                         }
 
@@ -286,18 +300,51 @@ Window {
                             onPressed: {
                                 if (index === 0) dof1 = -1
                                 else if (index === 1) dof2 = -1
-                                else dof3 = -1
+                                else if (index === 2) dof3 = -1
+                                else if (index === 3) dof4 = -1
                             }
 
                             onReleased: {
                                 if (index === 0) dof1 = 0
                                 else if (index === 1) dof2 = 0
-                                else dof3 = 0
+                                else if (index === 2) dof3 = 0
+                                else if (index === 3) dof4 = 0
+                            }
+
+                            onCanceled: {
+                                if (index === 0) dof1 = 0
+                                else if (index === 1) dof2 = 0
+                                else if (index === 2) dof3 = 0
+                                else if (index === 3) dof4 = 0
                             }
                         }
                     }
                 }
+
             }
+
+            Button {
+                id: homeButton
+
+                text: "Home"
+                width: 100
+                height: 50
+
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.bottom: parent.bottom
+                anchors.bottomMargin: 10
+
+                onPressed: {
+                    home = 1
+                    homeTimer.restart()
+                }
+
+                onReleased: {
+                    home = 0
+                    homeTimer.stop()
+                }
+            }
+
         }
     }
 
@@ -308,8 +355,18 @@ Window {
         repeat: true
         running: true
         onTriggered: {
-            udpHandler.sendJoystickData(leftX, -leftY, rightX, -rightY, dof1, dof2, dof3,
-                                        currentScreen << 2 | omni << 1 | gripEnabled)
+            udpHandler.sendJoystickData(leftX, -leftY, rightX, -rightY, dof1, dof2, dof3, dof4,
+                                        currentScreen << 3 | home << 2 | omni << 1 | gripEnabled)
+        }
+    }
+
+    Timer {
+        id: homeTimer
+        interval: 100
+        repeat: false
+
+        onTriggered: {
+            home = 0
         }
     }
 
