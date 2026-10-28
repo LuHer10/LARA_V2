@@ -30,7 +30,7 @@ private:
     QUdpSocket senderSocket;
     QUdpSocket receiverSocket;
 
-    QHostAddress serverAddress = QHostAddress("192.168.0.100"); //QHostAddress("192.168.253.100"); //QHostAddress("192.168.1.128");  // Replace with your server IP
+    QHostAddress serverAddress = QHostAddress("192.168.0.105");  // Replace with your server IP
     quint16 sendPort = 40000;
     quint16 receivePort = 40001;
 };
