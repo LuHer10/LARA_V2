@@ -64,6 +64,8 @@ private:
     std::atomic<float> mediumOffset = MEDIUM_OFFSET;
     std::atomic<float> smallOffset = SMALL_OFFSET;
 
+    std::atomic<float> q1_start, q2_start, q3_start;
+
     void motorControl()
     {
         std::cout << "Motor control active\n";
@@ -76,19 +78,8 @@ private:
             bigMotor->pos_ctrl_red_rad(q1.load());
             mediumMotor->pos_control_rad((q2.load()));
             smallMotor->pos_control_rad(q3.load());   
-            std::this_thread::sleep_for(std::chrono::milliseconds(10)); 
-            //mq1.store(bigMotor->getPositionRad() + (M_PI/2.0f) - deg2rad(bigOffset));
-            //mq2.store(-mediumMotor->get_position_rad() - deg2rad(mediumOffset));
-            //mq3.store(smallMotor->get_position_rad() - deg2rad(smallOffset));
+            std::this_thread::sleep_for(std::chrono::milliseconds(20)); 
             
-            //mq1.store(mBigRaw.load() - deg2rad(bigOffset.load()));
-            //mq2.store(mMedRaw.load() + deg2rad(mediumOffset.load()));
-            //mq3.store(mSmaRaw.load() - deg2rad(smallOffset.load()));
-            //DK(mq1.load(), mq2.load(), mq3.load(), _mx, _my, _mth);
-            //mx.store(_mx);
-            //my.store(_my);
-            //mth.store(_mth);
-            std::this_thread::sleep_for(std::chrono::milliseconds(10)); 
         }
         std::cout << "Motor control inactive\n";
 
@@ -113,20 +104,19 @@ public:
         l2 = _l2;
         l3 = _l3;
 
-        x.store(l2 + l3);
-        y.store(l1);
-        th.store(0.0f);
-
-        //IK();
-
         mBigRaw.store(bigMotor->getPositionRad());
         mMedRaw.store(mediumMotor->get_position_rad());
         mSmaRaw.store(smallMotor->get_position_rad());
 
-
         q1.store(mBigRaw.load());
         q2.store(mMedRaw.load());
         q3.store(mSmaRaw.load());
+
+        q1_start.store(q1);
+        q2_start.store(q2);
+        q3_start.store(q3);
+
+        DK();
 
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
@@ -135,16 +125,13 @@ public:
         servos.init();
         servos.enableTorque(GRIP_ID);
 
-        
-
-
     }
 
     ~Arm()
     {
         stopThread = true;
         controlThread.join();
-        //bigMotor->stop_motor();
+        bigMotor->stop_motor();
         mediumMotor->stop_motor();
         smallMotor->stop_motor();
     }
@@ -283,10 +270,76 @@ public:
 
     void home()
     {
-        q1.store(deg2rad(90.0f));
-        q2.store(deg2rad(90.0f));
-        q3.store(deg2rad(180.0f));
-        //DK();
+        float q1diff = q1.load() - q1_start.load();
+        float q2diff = q2.load() - q2_start.load();
+        float q3diff = q3.load() - q3_start.load();
+
+        bool condition = (abs(q1diff)>0.1f) && (abs(q2diff)>0.1f) && (abs(q3diff)>0.1f);
+        
+        float incr = 0.05f;
+
+        while(condition)
+        {
+            if(q1diff>0) q1.store(q1.load()-incr);
+            else if(q1diff<0) q1.store(q1.load()+incr);
+
+            if(q2diff>0) q2.store(q2.load()-incr);
+            else if(q2diff<0) q2.store(q2.load()+incr);
+            
+            if(q3diff>0) q3.store(q3.load()-incr);
+            else if(q3diff<0) q3.store(q3.load()+incr);
+        
+            q1diff = q1.load() - q1_start.load();
+            q2diff = q2.load() - q2_start.load();
+            q3diff = q3.load() - q3_start.load();
+
+            condition = (abs(q1diff)>0.1f) && (abs(q2diff)>0.1f) && (abs(q3diff)>0.1f);
+
+            std::this_thread::sleep_for(std::chrono::milliseconds(20));
+
+        }
+    }
+
+    void getUp()
+    {
+        float q1_offset = q1_start.load() - M_PI;
+        float q2_offset = q2_start.load() - 0.0f;
+        float q3_offset = q3_start.load() - 2.0f*M_PI;
+
+        //q1 = q1_real + q1_offset
+
+        float q1_target = q1_start.load() + M_PI/2.0f;
+        float q2_target = q1_start.load() + M_PI/2.0f;
+        float q3_target = q1_start.load() + M_PI;
+
+        float q1diff = q1.load() - q1_target;
+        float q2diff = q2.load() - q2_target;
+        float q3diff = q3.load() - q3_target;
+
+        bool condition = (abs(q1diff)>0.1f) && (abs(q2diff)>0.1f) && (abs(q3diff)>0.1f);
+        
+        float incr = 0.05f;
+
+        while(condition)
+        {
+            if(q1diff>0) q1.store(q1.load()-incr);
+            else if(q1diff<0) q1.store(q1.load()+incr);
+
+            if(q2diff>0) q2.store(q2.load()-incr);
+            else if(q2diff<0) q2.store(q2.load()+incr);
+            
+            if(q3diff>0) q3.store(q3.load()-incr);
+            else if(q3diff<0) q3.store(q3.load()+incr);
+        
+            q1diff = q1.load() - q1_start.load();
+            q2diff = q2.load() - q2_start.load();
+            q3diff = q3.load() - q3_start.load();
+
+            condition = (abs(q1diff)>0.1f) && (abs(q2diff)>0.1f) && (abs(q3diff)>0.1f);
+
+            std::this_thread::sleep_for(std::chrono::milliseconds(20));
+
+        }
     }
 
     
