@@ -67,6 +67,7 @@ int main() {
     odo = base.getOdometry();
 
     //arm.open();
+    arm.getUp();
 
     while (1) {
 

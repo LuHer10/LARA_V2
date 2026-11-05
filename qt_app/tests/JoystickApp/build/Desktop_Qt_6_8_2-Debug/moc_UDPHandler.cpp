@@ -51,6 +51,7 @@ static constexpr auto qt_meta_stringdata_ZN10UDPHandlerE = QtMocHelpers::stringD
     "d1",
     "d2",
     "d3",
+    "d4",
     "mode"
 );
 #else  // !QT_MOC_HAS_STRINGDATA
@@ -77,7 +78,7 @@ Q_CONSTINIT static const uint qt_meta_data_ZN10UDPHandlerE[] = {
        4,    0,   35,    2, 0x08,    3 /* Private */,
 
  // methods: name, argc, parameters, tag, flags, initial metatype offsets
-       5,    8,   36,    2, 0x02,    4 /* Public */,
+       5,    9,   36,    2, 0x02,    4 /* Public */,
 
  // signals: parameters
     QMetaType::Void, QMetaType::QString,    3,
@@ -86,7 +87,7 @@ Q_CONSTINIT static const uint qt_meta_data_ZN10UDPHandlerE[] = {
     QMetaType::Void,
 
  // methods: parameters
-    QMetaType::Void, QMetaType::Float, QMetaType::Float, QMetaType::Float, QMetaType::Float, 0x80000000 | 10, 0x80000000 | 10, 0x80000000 | 10, 0x80000000 | 10,    6,    7,    8,    9,   11,   12,   13,   14,
+    QMetaType::Void, QMetaType::Float, QMetaType::Float, QMetaType::Float, QMetaType::Float, 0x80000000 | 10, 0x80000000 | 10, 0x80000000 | 10, 0x80000000 | 10, 0x80000000 | 10,    6,    7,    8,    9,   11,   12,   13,   14,   15,
 
        0        // eod
 };
@@ -114,6 +115,7 @@ Q_CONSTINIT const QMetaObject UDPHandler::staticMetaObject = { {
         QtPrivate::TypeAndForceComplete<int8_t, std::false_type>,
         QtPrivate::TypeAndForceComplete<int8_t, std::false_type>,
         QtPrivate::TypeAndForceComplete<int8_t, std::false_type>,
+        QtPrivate::TypeAndForceComplete<int8_t, std::false_type>,
         QtPrivate::TypeAndForceComplete<int8_t, std::false_type>
     >,
     nullptr
@@ -126,7 +128,7 @@ void UDPHandler::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, 
         switch (_id) {
         case 0: _t->dataReceived((*reinterpret_cast< std::add_pointer_t<QString>>(_a[1]))); break;
         case 1: _t->processPendingDatagrams(); break;
-        case 2: _t->sendJoystickData((*reinterpret_cast< std::add_pointer_t<float>>(_a[1])),(*reinterpret_cast< std::add_pointer_t<float>>(_a[2])),(*reinterpret_cast< std::add_pointer_t<float>>(_a[3])),(*reinterpret_cast< std::add_pointer_t<float>>(_a[4])),(*reinterpret_cast< std::add_pointer_t<int8_t>>(_a[5])),(*reinterpret_cast< std::add_pointer_t<int8_t>>(_a[6])),(*reinterpret_cast< std::add_pointer_t<int8_t>>(_a[7])),(*reinterpret_cast< std::add_pointer_t<int8_t>>(_a[8]))); break;
+        case 2: _t->sendJoystickData((*reinterpret_cast< std::add_pointer_t<float>>(_a[1])),(*reinterpret_cast< std::add_pointer_t<float>>(_a[2])),(*reinterpret_cast< std::add_pointer_t<float>>(_a[3])),(*reinterpret_cast< std::add_pointer_t<float>>(_a[4])),(*reinterpret_cast< std::add_pointer_t<int8_t>>(_a[5])),(*reinterpret_cast< std::add_pointer_t<int8_t>>(_a[6])),(*reinterpret_cast< std::add_pointer_t<int8_t>>(_a[7])),(*reinterpret_cast< std::add_pointer_t<int8_t>>(_a[8])),(*reinterpret_cast< std::add_pointer_t<int8_t>>(_a[9]))); break;
         default: ;
         }
     }

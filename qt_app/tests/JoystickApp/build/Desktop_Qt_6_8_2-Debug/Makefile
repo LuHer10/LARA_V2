@@ -37,7 +37,7 @@ MOVE          = mv -f
 TAR           = tar -cf
 COMPRESS      = gzip -9f
 DISTNAME      = JoystickApp1.0.0
-DISTDIR = /home/lucas/repos/LARA/qt_app/tests/JoystickApp/build/Desktop_Qt_6_8_2-Debug/.tmp/JoystickApp1.0.0
+DISTDIR = /home/lucas/repos/LARA_V2/qt_app/tests/JoystickApp/build/Desktop_Qt_6_8_2-Debug/.tmp/JoystickApp1.0.0
 LINK          = g++
 LFLAGS        = -Wl,-rpath,/home/lucas/Qt/6.8.2/gcc_64/lib -Wl,-rpath-link,/home/lucas/Qt/6.8.2/gcc_64/lib
 LIBS          = $(SUBLIBS) /home/lucas/Qt/6.8.2/gcc_64/lib/libQt6Quick.so /home/lucas/Qt/6.8.2/gcc_64/lib/libQt6OpenGL.so /home/lucas/Qt/6.8.2/gcc_64/lib/libQt6Gui.so /home/lucas/Qt/6.8.2/gcc_64/lib/libQt6QmlMeta.so /home/lucas/Qt/6.8.2/gcc_64/lib/libQt6QmlModels.so /home/lucas/Qt/6.8.2/gcc_64/lib/libQt6QmlWorkerScript.so /home/lucas/Qt/6.8.2/gcc_64/lib/libQt6Qml.so -pthread /home/lucas/Qt/6.8.2/gcc_64/lib/libQt6Network.so /home/lucas/Qt/6.8.2/gcc_64/lib/libQt6Core.so -lpthread -lGL   
@@ -283,6 +283,7 @@ DIST          = ../../../JoystickApp.pro/AndroidManifest.xml \
 		/home/lucas/Qt/6.8.2/gcc_64/mkspecs/features/qt_config.prf \
 		/home/lucas/Qt/6.8.2/gcc_64/mkspecs/linux-g++/qmake.conf \
 		/home/lucas/Qt/6.8.2/gcc_64/mkspecs/features/spec_post.prf \
+		../../.qmake.stash \
 		/home/lucas/Qt/6.8.2/gcc_64/mkspecs/features/exclusive_builds.prf \
 		/home/lucas/Qt/6.8.2/gcc_64/mkspecs/features/toolchain.prf \
 		/home/lucas/Qt/6.8.2/gcc_64/mkspecs/features/default_pre.prf \
@@ -527,6 +528,7 @@ Makefile: ../../JoystickApp.pro /home/lucas/Qt/6.8.2/gcc_64/mkspecs/linux-g++/qm
 		/home/lucas/Qt/6.8.2/gcc_64/mkspecs/features/qt_config.prf \
 		/home/lucas/Qt/6.8.2/gcc_64/mkspecs/linux-g++/qmake.conf \
 		/home/lucas/Qt/6.8.2/gcc_64/mkspecs/features/spec_post.prf \
+		.qmake.stash \
 		/home/lucas/Qt/6.8.2/gcc_64/mkspecs/features/exclusive_builds.prf \
 		/home/lucas/Qt/6.8.2/gcc_64/mkspecs/features/toolchain.prf \
 		/home/lucas/Qt/6.8.2/gcc_64/mkspecs/features/default_pre.prf \
@@ -770,6 +772,7 @@ Makefile: ../../JoystickApp.pro /home/lucas/Qt/6.8.2/gcc_64/mkspecs/linux-g++/qm
 /home/lucas/Qt/6.8.2/gcc_64/mkspecs/features/qt_config.prf:
 /home/lucas/Qt/6.8.2/gcc_64/mkspecs/linux-g++/qmake.conf:
 /home/lucas/Qt/6.8.2/gcc_64/mkspecs/features/spec_post.prf:
+.qmake.stash:
 /home/lucas/Qt/6.8.2/gcc_64/mkspecs/features/exclusive_builds.prf:
 /home/lucas/Qt/6.8.2/gcc_64/mkspecs/features/toolchain.prf:
 /home/lucas/Qt/6.8.2/gcc_64/mkspecs/features/default_pre.prf:
@@ -982,7 +985,7 @@ moc_UDPHandler.cpp: ../../UDPHandler.h \
 		/home/lucas/Qt/6.8.2/gcc_64/include/QtCore/qvarlengtharray.h \
 		moc_predefs.h \
 		/home/lucas/Qt/6.8.2/gcc_64/libexec/moc
-	/home/lucas/Qt/6.8.2/gcc_64/libexec/moc $(DEFINES) --include /home/lucas/repos/LARA/qt_app/tests/JoystickApp/build/Desktop_Qt_6_8_2-Debug/moc_predefs.h -I/home/lucas/Qt/6.8.2/gcc_64/mkspecs/linux-g++ -I/home/lucas/repos/LARA/qt_app/tests/JoystickApp -I/home/lucas/Qt/6.8.2/gcc_64/include -I/home/lucas/Qt/6.8.2/gcc_64/include/QtQuick -I/home/lucas/Qt/6.8.2/gcc_64/include/QtOpenGL -I/home/lucas/Qt/6.8.2/gcc_64/include/QtGui -I/home/lucas/Qt/6.8.2/gcc_64/include/QtQmlMeta -I/home/lucas/Qt/6.8.2/gcc_64/include/QtQmlModels -I/home/lucas/Qt/6.8.2/gcc_64/include/QtQmlWorkerScript -I/home/lucas/Qt/6.8.2/gcc_64/include/QtQml -I/home/lucas/Qt/6.8.2/gcc_64/include/QtQmlIntegration -I/home/lucas/Qt/6.8.2/gcc_64/include/QtNetwork -I/home/lucas/Qt/6.8.2/gcc_64/include/QtCore -I. -I/usr/include/c++/13 -I/usr/include/x86_64-linux-gnu/c++/13 -I/usr/include/c++/13/backward -I/usr/lib/gcc/x86_64-linux-gnu/13/include -I/usr/local/include -I/usr/include/x86_64-linux-gnu -I/usr/include ../../UDPHandler.h -o moc_UDPHandler.cpp
+	/home/lucas/Qt/6.8.2/gcc_64/libexec/moc $(DEFINES) --include /home/lucas/repos/LARA_V2/qt_app/tests/JoystickApp/build/Desktop_Qt_6_8_2-Debug/moc_predefs.h -I/home/lucas/Qt/6.8.2/gcc_64/mkspecs/linux-g++ -I/home/lucas/repos/LARA_V2/qt_app/tests/JoystickApp -I/home/lucas/Qt/6.8.2/gcc_64/include -I/home/lucas/Qt/6.8.2/gcc_64/include/QtQuick -I/home/lucas/Qt/6.8.2/gcc_64/include/QtOpenGL -I/home/lucas/Qt/6.8.2/gcc_64/include/QtGui -I/home/lucas/Qt/6.8.2/gcc_64/include/QtQmlMeta -I/home/lucas/Qt/6.8.2/gcc_64/include/QtQmlModels -I/home/lucas/Qt/6.8.2/gcc_64/include/QtQmlWorkerScript -I/home/lucas/Qt/6.8.2/gcc_64/include/QtQml -I/home/lucas/Qt/6.8.2/gcc_64/include/QtQmlIntegration -I/home/lucas/Qt/6.8.2/gcc_64/include/QtNetwork -I/home/lucas/Qt/6.8.2/gcc_64/include/QtCore -I. -I/usr/include/c++/13 -I/usr/include/x86_64-linux-gnu/c++/13 -I/usr/include/c++/13/backward -I/usr/lib/gcc/x86_64-linux-gnu/13/include -I/usr/local/include -I/usr/include/x86_64-linux-gnu -I/usr/include ../../UDPHandler.h -o moc_UDPHandler.cpp
 
 compiler_moc_objc_header_make_all:
 compiler_moc_objc_header_clean:

@@ -263,9 +263,9 @@ public:
         //mBigRaw.store(bigMotor->getPositionRad() + (M_PI/2.0f));
         //mMedRaw.store(-mediumMotor->get_position_rad());
         //mSmaRaw.store(smallMotor->get_position_rad());
-        bigOffset.store(mBigRaw.load() - deg2rad(90.0f));
-        mediumOffset.store(mMedRaw.load() - deg2rad(90.0f));
-        smallOffset.store(mSmaRaw.load() - deg2rad(180.0f));
+        //bigOffset.store(mBigRaw.load() - deg2rad(90.0f));
+        //mediumOffset.store(mMedRaw.load() - deg2rad(90.0f));
+        //smallOffset.store(mSmaRaw.load() - deg2rad(180.0f));
     }
 
     void home()
@@ -308,17 +308,16 @@ public:
 
         //q1 = q1_real + q1_offset
 
-        float q1_target = q1_start.load() + M_PI/2.0f;
-        float q2_target = q1_start.load() + M_PI/2.0f;
-        float q3_target = q1_start.load() + M_PI;
+        float q1_target = q1_start.load() - M_PI/2.0f;
+        float q2_target = q2_start.load() - M_PI/2.0f;
+        float q3_target = q3_start.load() - M_PI;
 
         float q1diff = q1.load() - q1_target;
         float q2diff = q2.load() - q2_target;
         float q3diff = q3.load() - q3_target;
 
-        bool condition = (abs(q1diff)>0.1f) && (abs(q2diff)>0.1f) && (abs(q3diff)>0.1f);
-        
-        float incr = 0.05f;
+        float incr = 0.01f;
+        bool condition = (abs(q1diff)>2.0f*incr) && (abs(q2diff)>2.0f*incr) && (abs(q3diff)>2.0f*incr);
 
         while(condition)
         {
@@ -331,11 +330,11 @@ public:
             if(q3diff>0) q3.store(q3.load()-incr);
             else if(q3diff<0) q3.store(q3.load()+incr);
         
-            q1diff = q1.load() - q1_start.load();
-            q2diff = q2.load() - q2_start.load();
-            q3diff = q3.load() - q3_start.load();
+            q1diff = q1.load() - q1_target;
+            q2diff = q2.load() - q2_target;
+            q3diff = q3.load() - q3_target;
 
-            condition = (abs(q1diff)>0.1f) && (abs(q2diff)>0.1f) && (abs(q3diff)>0.1f);
+            condition = (abs(q1diff)>2.0f*incr) && (abs(q2diff)>2.0f*incr) && (abs(q3diff)>2.0f*incr);
 
             std::this_thread::sleep_for(std::chrono::milliseconds(20));
 
