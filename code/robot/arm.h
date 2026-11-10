@@ -136,6 +136,20 @@ public:
         smallMotor->stop_motor();
     }
 
+    void enable()
+    {
+        bigMotor->start_motor();
+        mediumMotor->start_motor();
+        smallMotor->start_motor();
+    }
+
+    void disable()
+    {
+        bigMotor->stop_motor();
+        mediumMotor->stop_motor();
+        smallMotor->stop_motor();
+    }
+
     void open(){servos.writePos(GRIP_ID, degToPos(230));}
     void close(){servos.writePos(GRIP_ID, degToPos(170));}
     void moveWristIncr(int dir)

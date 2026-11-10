@@ -35,6 +35,8 @@ int main() {
     int8_t mode;
     int8_t grip = 0;
     int8_t omni = 0;
+    int8_t emergency = 0;
+    int8_t pre_emer = emergency;
 
     int home = 0;
     int pre_home = home;
@@ -67,7 +69,7 @@ int main() {
     odo = base.getOdometry();
 
     //arm.open();
-    arm.getUp();
+    //arm.getUp();
 
     while (1) {
 
@@ -82,9 +84,11 @@ int main() {
                              mode);
 
         pre_home = home;
+        pre_emer = emergency;
 
         home = (mode >> 2) & 0x01;
         omni = (mode >> 1) & 0x01;
+        emergency = (mode >> 4) & 0x01;
 
         base.readEncoders();
 
@@ -104,6 +108,25 @@ int main() {
         //changed = 1;
         //x_left = 0;
         printf("Xdir Ydir Rotx Roty :%f %f %f %f\n", x_left, y_left, x_right, y_right);
+
+        if(emergency)
+        {
+            if(emergency != pre_emer)
+            {
+                arm.disable();
+            }
+            base.setVelocity(0.0f, 0.0f, 0.0f);
+            usleep(1000);
+            continue;
+        }
+        if(!emergency)
+        {
+            if(emergency != pre_emer)
+            {
+                arm.enable();
+            }
+        }
+
         if(changed)
         {
             if(omni)

@@ -4,6 +4,7 @@ import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
 
 Window {
+    id: root
     visible: true
     width: 640
     height: 480
@@ -29,12 +30,34 @@ Window {
 
     property int home: 0
 
+    // Emergency stop state (latching: stays active until RESET is pressed)
+    property bool estop: false
+
+    function setEstop(on) {
+        estop = on
+        if (on) {
+            // Zero every command immediately
+            leftX = 0; leftY = 0
+            rightX = 0; rightY = 0
+            dof1 = 0; dof2 = 0; dof3 = 0; dof4 = 0
+            home = 0
+            homeTimer.stop()
+
+            // Recentre the joystick knobs visually
+            leftKnob.x = leftJoystick.width / 2 - leftKnob.width / 2
+            leftKnob.y = leftJoystick.height / 2 - leftKnob.height / 2
+            rightKnob.x = rightJoystick.width / 2 - rightKnob.width / 2
+            rightKnob.y = rightJoystick.height / 2 - rightKnob.height / 2
+        }
+    }
+
     Button {
             id: screenButton
             anchors.top: parent.top
             anchors.right: parent.right
             anchors.margins: 10
             z: 1
+            enabled: !estop
 
             text: currentScreen === 0
                   ? "Joint Control"
@@ -49,6 +72,7 @@ Window {
         id: screenLayout
         anchors.fill: parent
         currentIndex: currentScreen
+        enabled: !estop   // all controls are locked while E-STOP is active
 
         // SCREEN 1: Joystick controls
         Item {
@@ -355,8 +379,16 @@ Window {
         repeat: true
         running: true
         onTriggered: {
-            udpHandler.sendJoystickData(leftX, -leftY, rightX, -rightY, dof1, dof2, dof3, dof4,
-                                        currentScreen << 3 | home << 2 | omni << 1 | gripEnabled)
+            // Flag bits: 0 = grip, 1 = omni, 2 = home, 3 = screen, 4 = E-STOP
+            let flags = currentScreen << 3 | home << 2 | omni << 1 | gripEnabled
+            if (estop) {
+                // While stopped: all motion commands forced to zero, E-STOP bit set.
+                // The state is re-sent every cycle so a lost UDP packet can't hide it.
+                flags |= (1 << 4)
+                udpHandler.sendJoystickData(0, 0, 0, 0, 0, 0, 0, 0, flags)
+            } else {
+                udpHandler.sendJoystickData(leftX, -leftY, rightX, -rightY, dof1, dof2, dof3, dof4, flags)
+            }
         }
     }
 
@@ -377,6 +409,61 @@ Window {
         font.pixelSize: 24
         text: "Waiting for server..."
         padding: 10
+    }
+
+    // EMERGENCY STOP button: always visible, on top of both screens
+    Button {
+        id: estopButton
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.margins: 10
+        width: 130
+        height: 70
+        z: 10
+
+        text: estop ? "RESET" : "E-STOP"
+
+        contentItem: Text {
+            text: estopButton.text
+            font.pixelSize: 22
+            font.bold: true
+            color: "white"
+            horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
+        }
+
+        background: Rectangle {
+            radius: 8
+            color: estop
+                   ? (estopButton.down ? "#117711" : "#22AA22")
+                   : (estopButton.down ? "#990000" : "#DD0000")
+            border.color: "white"
+            border.width: 3
+        }
+
+        onClicked: setEstop(!estop)
+    }
+
+    // Banner shown while E-STOP is active
+    Rectangle {
+        visible: estop
+        z: 9
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.top: parent.top
+        anchors.topMargin: 55
+        width: bannerText.width + 40
+        height: bannerText.height + 16
+        radius: 6
+        color: "#DD0000"
+
+        Text {
+            id: bannerText
+            anchors.centerIn: parent
+            text: "EMERGENCY STOP ACTIVE"
+            color: "white"
+            font.pixelSize: 20
+            font.bold: true
+        }
     }
 
 
