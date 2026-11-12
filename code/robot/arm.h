@@ -112,11 +112,15 @@ public:
         q2.store(mMedRaw.load());
         q3.store(mSmaRaw.load());
 
-        q1_start.store(q1);
-        q2_start.store(q2);
-        q3_start.store(q3);
+        q1_start.store(q1); //->180
+        q2_start.store(q2); //->  0
+        q3_start.store(q3); //->360
+        /*
+            180 = q1_start - offset
+            q1r = m1 - offset
+        */
 
-        DK();
+        //DK();
 
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
