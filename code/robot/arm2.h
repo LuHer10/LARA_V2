@@ -34,7 +34,7 @@ float deg2rad(float _deg)
 
 class Arm
 {
-private:
+public:
 
     Servo servos;
 
@@ -119,8 +119,8 @@ public:
         */
 
         m1_offset.store(M1_REST - m1_start.load());
-        m2_offset.store(M2_REST - m1_start.load());
-        m1_offset.store(M3_REST - m1_start.load());
+        m2_offset.store(M2_REST - m2_start.load());
+        m3_offset.store(M3_REST - m3_start.load());
 
         //q1.store(m1.load()+m1_offset.load());
         //q2.store(m2.load()+m2_offset.load());
@@ -148,46 +148,62 @@ public:
         smallMotor->stop_motor();
     }
 
-    void m2q(std::atomic<float>& _m1, std::atomic<float>& _m2, std::atomic<float>& _m3, 
-        std::atomic<float>& _q1, std::atomic<float>& _q2, std::atomic<float>& _q3)
-    {
-        _q1.store(_m1.load() + m1_offset.load());
-        _q2.store(_m2.load() + m2_offset.load());
-        _q3.store(_m3.load() + m3_offset.load());
-    }
     void m2q(float _m1, float _m2, float _m3, 
         float& _q1, float& _q2, float& _q3)
     {
-        _q1 = _m1 + m1_offset.load();
-        _q2 = _m2 + m2_offset.load();
+        _q1 = m1_offset.load() - _m1;  //ok
+        _q2 = _m2 + m2_offset.load();  //ok
         _q3 = _m3 + m3_offset.load();
     }
+
+    void q2m(float _q1, float _q2, float _q3, 
+        float& _m1, float& _m2, float& _m3)
+    {
+        _m1 = m1_offset.load() - _q1; //ok
+        _m2 = _q2 - m2_offset.load(); //ok
+        _m3 = _q3 - m3_offset.load();
+    }
+
+    void m2q(std::atomic<float>& _m1, std::atomic<float>& _m2, std::atomic<float>& _m3, 
+        std::atomic<float>& _q1, std::atomic<float>& _q2, std::atomic<float>& _q3)
+    {
+        float m1a = _m1.load(), m2a = _m2.load(), m3a = _m3.load();
+        float q1a, q2a, q3a;
+        m2q(m1a, m2a, m3a, q1a, q2a, q3a);
+        _q1.store(q1a);
+        _q2.store(q2a);
+        _q3.store(q3a);
+    }
+    
     void m2q()
     {
-        q1.store(m1.load() + m1_offset.load());
-        q2.store(m2.load() + m2_offset.load());
-        q3.store(m3.load() + m3_offset.load());
+        float m1a = m1.load(), m2a = m2.load(), m3a = m3.load();
+        float q1a, q2a, q3a;
+        m2q(m1a, m2a, m3a, q1a, q2a, q3a);
+        q1.store(q1a);
+        q2.store(q2a);
+        q3.store(q3a);
     }
 
     void q2m(std::atomic<float>& _q1, std::atomic<float>& _q2, std::atomic<float>& _q3, 
         std::atomic<float>& _m1, std::atomic<float>& _m2, std::atomic<float>& _m3)
     {
-        _m1.store(_q1.load() - m1_offset.load());
-        _m2.store(_q2.load() - m2_offset.load());
-        _m3.store(_q3.load() - m3_offset.load());
+        float q1a = _q1.load(), q2a = _q2.load(), q3a = _q3.load();
+        float m1a, m2a, m3a;
+        q2m(q1a, q2a, q3a, m1a, m2a, m3a); 
+        _m1.store(m1a);
+        _m2.store(m2a);
+        _m3.store(m3a);
     }
-    void q2m(float _q1, float _q2, float _q3, 
-        float& _m1, float& _m2, float& _m3)
-    {
-        _m1 = _q1 + m1_offset.load();
-        _m2 = _q2 + m2_offset.load();
-        _m3 = _q3 + m3_offset.load();
-    }
+    
     void q2m()
     {
-        m1.store(q1.load() - m1_offset.load());
-        m2.store(q2.load() - m2_offset.load());
-        m3.store(q3.load() - m3_offset.load());
+        float q1a = q1.load(), q2a = q2.load(), q3a = q3.load();
+        float m1a, m2a, m3a;
+        q2m(q1a, q2a, q3a, m1a, m2a, m3a);
+        m1.store(m1a);
+        m2.store(m2a);
+        m3.store(m3a);
     }
 
     void enable()

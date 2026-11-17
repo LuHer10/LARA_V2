@@ -107,16 +107,16 @@ int main() {
 
         //changed = 1;
         //x_left = 0;
-        printf("Xdir Ydir Rotx Roty :%f %f %f %f\n", x_left, y_left, x_right, y_right);
+        //printf("Xdir Ydir Rotx Roty :%f %f %f %f\n", x_left, y_left, x_right, y_right);
 
         if(pre_home != home && home)
         {
-            arm.getUp();
+            //arm.getUp();
         }
 
         if(pre_home != home && !home)
         {
-            arm.home();
+            //arm.home();
         }
 
 
@@ -177,19 +177,21 @@ int main() {
 
         if(grip)
         {
-            arm.open();
+            //arm.open();
         }
         else
         {
-            arm.close();
+            //arm.close();
             
         }
 
         //arm.moveWristIncr(d4);
 
         printf("Brazo motores: %f, %f, %f \n", q1*180.0f/M_PI, q2*180.0f/M_PI, q3*180.0f/M_PI);
-        printf("Brazo X Y theta: %f, %f, %f, %d \n", x_left, arm_y, arm_th, manual);
-        printf("Esto??: %d, %d, %d  \n", d1, d2, d3);
+        printf("motor start: %f, %f, %f \n", arm.m1_start.load()*180.0f/M_PI, arm.m2_start.load()*180.0f/M_PI, arm.m3_start.load())*180.0f/M_PI;
+        printf("motor offset: %f, %f, %f \n", arm.m1_offset.load()*180.0f/M_PI, arm.m2_offset.load()*180.0f/M_PI, arm.m3_offset.load())*180.0f/M_PI;
+        //printf("Brazo X Y theta: %f, %f, %f, %d \n", x_left, arm_y, arm_th, manual);
+        //printf("Esto??: %d, %d, %d  \n", d1, d2, d3);
 
         //printf("%f, %f, %f, %f, %d \n", x_left, y_left, x_right, y_right, grip);
 
