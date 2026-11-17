@@ -40,8 +40,7 @@ Window {
             leftX = 0; leftY = 0
             rightX = 0; rightY = 0
             dof1 = 0; dof2 = 0; dof3 = 0; dof4 = 0
-            home = 0
-            homeTimer.stop()
+            homeButton.checked = false   // back to "Get Up" (also sets home = 0)
 
             // Recentre the joystick knobs visually
             leftKnob.x = leftJoystick.width / 2 - leftKnob.width / 2
@@ -233,9 +232,9 @@ Window {
                 width: 100
                 height: 50
 
-                anchors.right: parent.right
+                anchors.left: homeButton.right
                 anchors.bottom: parent.bottom
-                anchors.rightMargin: 200
+                anchors.leftMargin: 20
                 anchors.bottomMargin: 10
 
                 checkable: true
@@ -251,9 +250,9 @@ Window {
                 width: 100
                 height: 50
 
-                anchors.left: parent.left
+                anchors.right: homeButton.left
                 anchors.bottom: parent.bottom
-                anchors.leftMargin: 200
+                anchors.rightMargin: 20
                 anchors.bottomMargin: 10
 
                 checkable: true
@@ -261,6 +260,24 @@ Window {
 
                 onCheckedChanged: {
                     omni = checked
+                }
+            }
+
+            // Toggle: "Get Up" (default) <-> "Home"
+            Button {
+                id: homeButton
+                width: 100
+                height: 50
+
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.bottom: parent.bottom
+                anchors.bottomMargin: 10
+
+                checkable: true
+                text: checked ? "Home" : "Get Up"
+
+                onCheckedChanged: {
+                    home = checked ? 1 : 0
                 }
             }
 
@@ -347,28 +364,6 @@ Window {
 
             }
 
-            Button {
-                id: homeButton
-
-                text: "Home"
-                width: 100
-                height: 50
-
-                anchors.horizontalCenter: parent.horizontalCenter
-                anchors.bottom: parent.bottom
-                anchors.bottomMargin: 10
-
-                onPressed: {
-                    home = 1
-                    homeTimer.restart()
-                }
-
-                onReleased: {
-                    home = 0
-                    homeTimer.stop()
-                }
-            }
-
         }
     }
 
@@ -389,16 +384,6 @@ Window {
             } else {
                 udpHandler.sendJoystickData(leftX, -leftY, rightX, -rightY, dof1, dof2, dof3, dof4, flags)
             }
-        }
-    }
-
-    Timer {
-        id: homeTimer
-        interval: 100
-        repeat: false
-
-        onTriggered: {
-            home = 0
         }
     }
 

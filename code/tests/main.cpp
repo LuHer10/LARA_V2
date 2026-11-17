@@ -7,7 +7,7 @@
 
 #include "../robot/base.h"
 #include "../robot/network.h"
-#include "../robot/arm.h"
+#include "../robot/arm2.h"
 
 
 int main() {
@@ -94,7 +94,7 @@ int main() {
 
         odo = base.getOdometry();
 
-       net.sendOdometry(odo.x, odo.y, odo.ang);
+        net.sendOdometry(odo.x, odo.y, odo.ang);
 
         arm.getQs(q1, q2, q3);
         arm.DK(q1, q2, q3, arm_x, arm_y, arm_th);
@@ -108,6 +108,17 @@ int main() {
         //changed = 1;
         //x_left = 0;
         printf("Xdir Ydir Rotx Roty :%f %f %f %f\n", x_left, y_left, x_right, y_right);
+
+        if(pre_home != home && home)
+        {
+            arm.getUp();
+        }
+
+        if(pre_home != home && !home)
+        {
+            arm.home();
+        }
+
 
         if(emergency)
         {
@@ -161,12 +172,6 @@ int main() {
                 //arm.moveQs_incr(0.01f*d1, 0.01f*d2, 0.01*d3);
             }
         //}
-
-        if(pre_home != home && home)
-        {
-            //arm.setOffset();
-            //arm.home();
-        }
 
         grip = mode & 0x01;
 
