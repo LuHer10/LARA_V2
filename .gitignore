@@ -3,4 +3,5 @@ qt_app/tests/JoystickApp/.qtcreator
 qt_app/tests/JoystickApp/*.pro.user*
 qt_app/tests/JoystickApp/JoystickApp.pro.user
 **/build
+.vscode
 
