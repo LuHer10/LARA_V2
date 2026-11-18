@@ -8,7 +8,7 @@ bool RoboClaw::M1Duty(uint8_t address, uint16_t duty)
     packet[2] = (duty>>8) & 0xFF;
     packet[3] = duty & 0xFF;
 
-    uint8_t crc = crc16(packet, 4);
+    uint16_t crc = crc16(packet, 4);
     packet[4] = (crc>>8) & 0xFF;
     packet[5] = crc & 0xFF;
 
@@ -29,7 +29,7 @@ bool RoboClaw::M2Duty(uint8_t address, uint16_t duty)
     packet[2] = (duty>>8) & 0xFF;
     packet[3] = duty & 0xFF;
 
-    uint8_t crc = crc16(packet, 4);
+    uint16_t crc = crc16(packet, 4);
     packet[4] = (crc>>8) & 0xFF;
     packet[5] = crc & 0xFF;
 

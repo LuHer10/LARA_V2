@@ -75,6 +75,7 @@ public:
         roboclaw.M1M2Speed(BACK_ADDRESS, 0, 0);
     }
 
+    // vx, vy in m/s (robot frame, y forward), vrad in rad/s
     void setVelocity(float vx, float vy, float vrad);
 
     void FK(const float vm[4], float &vx, float &vy, float &vrad);

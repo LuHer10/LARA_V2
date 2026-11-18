@@ -5,6 +5,7 @@
 #include <mutex>
 #include <chrono>
 #include <math.h>
+#include <atomic>
 
 #ifndef STEADYWIN_H
 #define STEADYWIN_H
@@ -14,6 +15,8 @@
 //#define M_PI 3.1415926536f
 
 inline std::mutex stw_mtx;
+
+#define CAN_TIMEOUT_MS 20 // max wait for a motor reply
 
 #define GIM3505_8 0
 #define GIM4310_36 1
@@ -116,20 +119,26 @@ private:
     int id;
     int motor_type;
 
-    int8_t temp;
-    float pos;
-    float speed;
-    float torque;
-    float torq_const;
-    int32_t gear_ratio;
+    int8_t temp = 0;
+    float pos = 0.0f;
+    float speed = 0.0f;
+    float torque = 0.0f;
+    float torq_const = 0.0f;
+    int32_t gear_ratio = 1;
 
-    float pos_ind_deg;
-    float pos_ind_rad;
-    float speed_ind_rpms;
-    float speed_ind_rad;
-    float speed_ind_deg;
+    // Last successfully read values; returned unchanged when a read times out.
+    float pos_ind_deg = 0.0f;
+    float pos_ind_rad = 0.0f;
+    float speed_ind_rpms = 0.0f;
+    float speed_ind_rad = 0.0f;
+    float speed_ind_deg = 0.0f;
 
     int turn = 0;
+
+    // Result of the most recent request/reply exchange.
+    std::atomic<bool> comm_ok{false};
+
+    bool transact(const struct can_frame& request, struct can_frame& reply);
 
 public:
 
@@ -146,6 +155,9 @@ public:
     {
         stop_motor();
     }
+
+    // True if the last command to this motor got a reply in time.
+    bool ok() const { return comm_ok.load(); }
 
     float get_torq_const();
     int32_t get_gear_ratio();

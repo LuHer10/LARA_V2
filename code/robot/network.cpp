@@ -229,7 +229,8 @@ void Network::sendOdometry(float x, float y, float ang, long dt_us)
             memcpy(&msg[5], &y, sizeof(float));
             memcpy(&msg[9], &ang, sizeof(float));
 
-            sendto(sockfd, msg, strlen(msg), 0,
+            // Binary payload: fixed length, never strlen() (floats contain 0x00 bytes)
+            sendto(sockfd, msg, SEND_PACKET_SIZE, 0,
                    (struct sockaddr *)&send_addr, sizeof(send_addr));
 
             gettimeofday(&last_send_time, NULL);

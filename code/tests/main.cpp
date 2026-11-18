@@ -4,20 +4,29 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <cmath>
+#include <memory>
+#include <stdexcept>
 
 #include "../robot/base.h"
 #include "../robot/network.h"
 #include "../robot/arm2.h"
 
+// Joystick full-scale speeds. Base::setVelocity takes SI units (m/s, rad/s);
+// these reproduce the speeds the robot had before the IK unit fix
+// (5 and 10 "wheel rad/s" units => ~0.32 m/s and ~0.64 rad/s).
+constexpr float MAX_LIN_SPEED = 5.0f  * WHEEL_RADIUS;  // m/s
+constexpr float MAX_ANG_SPEED = 10.0f * WHEEL_RADIUS;  // rad/s
+
 
 int main() {
 
     SocketCAN can("can0");
-    if (!can.open()) {
-        std::cerr << "Failed to open CAN\n";
-        //return 1;
+    bool canOk = can.open();
+    if (!canOk) {
+        std::cerr << "Failed to open CAN: running base only, arm disabled\n";
+    } else {
+        can.setNonBlocking(true);
     }
-    can.setNonBlocking(true);
 
     Network net;
     
@@ -26,13 +35,13 @@ int main() {
     float x_right = 0.0F;
     float y_right = 0.0F;
 
-    float q1, q2, q3;
-    float arm_x, arm_y, arm_th;
+    float q1 = 0, q2 = 0, q3 = 0;
+    float arm_x = 0, arm_y = 0, arm_th = 0;
 
     // estas variables no se lo que son
-    int8_t d1, d2, d3, d4;
+    int8_t d1 = 0, d2 = 0, d3 = 0, d4 = 0;
 
-    int8_t mode;
+    int8_t mode = 0;
     int8_t grip = 0;
     int8_t omni = 0;
     int8_t emergency = 0;
@@ -59,9 +68,16 @@ int main() {
     float l2 = 0.33f;
     float l3 = 0.1f;
 
-    Arm arm(&can, l1, l2, l3);
-    arm.getCoord(arm_x, arm_y, arm_th);
-    arm.getQs(q1, q2, q3);
+    std::unique_ptr<Arm> arm;
+    if (canOk) {
+        try {
+            arm = std::make_unique<Arm>(&can, l1, l2, l3);
+            arm->getCoord(arm_x, arm_y, arm_th);
+            arm->getQs(q1, q2, q3);
+        } catch (const std::exception& e) {
+            std::cerr << e.what() << ": running base only, arm disabled\n";
+        }
+    }
     
     std::cout << "YUJU1" << std::endl;
     base.readEncoders();
@@ -96,9 +112,10 @@ int main() {
 
         net.sendOdometry(odo.x, odo.y, odo.ang);
 
-        arm.getQs(q1, q2, q3);
-        arm.DK(q1, q2, q3, arm_x, arm_y, arm_th);
-        arm.getCoord(arm_x, arm_y, arm_th);
+        if (arm) {
+            arm->getQs(q1, q2, q3);
+            arm->getCoord(arm_x, arm_y, arm_th);
+        }
 
         changed = (pre_x_left != x_left)
                 || (pre_y_left != y_left)
@@ -122,19 +139,21 @@ int main() {
 
         if(emergency)
         {
-            if(emergency != pre_emer)
+            if(emergency != pre_emer && arm)
             {
-                arm.disable();
+                arm->disable();
             }
+            // Actually command zero speed every cycle while the E-stop is held
             base.setVelocity(0.0f, 0.0f, 0.0f);
+            base.sendSpeed();
             usleep(1000);
             continue;
         }
         if(!emergency)
         {
-            if(emergency != pre_emer)
+            if(emergency != pre_emer && arm)
             {
-                arm.enable();
+                arm->enable();
             }
         }
 
@@ -145,21 +164,21 @@ int main() {
                 // left y right se refiere a los indicadores de la app de Lucas 
                 // X en la ap es el eje horizontal
                 // Y en la ap es el eje vertical
-                base.setVelocity(x_left*5.0f, y_left*5.0f, -x_right*10.0f);
+                base.setVelocity(x_left*MAX_LIN_SPEED, y_left*MAX_LIN_SPEED, -x_right*MAX_ANG_SPEED);
                 //base.setVelocity(0.0f, 0.0f, 0.0f);
                 base.sendSpeed();
                 
             }
             else
             {
-                base.setVelocity(0.0f , y_left*5.0f, -x_left*10.0f);
+                base.setVelocity(0.0f , y_left*MAX_LIN_SPEED, -x_left*MAX_ANG_SPEED);
                 base.sendSpeed();
             }
             
         }
 
         //arm.moveCoordIncr(x_right*0.001f, y_right*0.001f, 0.0f);
-        arm.moveQs_incr(0.01f*d1, 0.01f*d2, 0.01*d3);
+        if (arm) arm->moveQs_incr(0.01f*d1, 0.01f*d2, 0.01f*d3);
 
         //if(!omni)
         //{
@@ -188,8 +207,10 @@ int main() {
         //arm.moveWristIncr(d4);
 
         printf("Brazo motores: %f, %f, %f \n", q1*180.0f/M_PI, q2*180.0f/M_PI, q3*180.0f/M_PI);
-        printf("motor start: %f, %f, %f \n", arm.m1_start.load()*180.0f/M_PI, arm.m2_start.load()*180.0f/M_PI, arm.m3_start.load())*180.0f/M_PI;
-        printf("motor offset: %f, %f, %f \n", arm.m1_offset.load()*180.0f/M_PI, arm.m2_offset.load()*180.0f/M_PI, arm.m3_offset.load())*180.0f/M_PI;
+        if (arm) {
+            printf("motor start: %f, %f, %f \n", arm->m1_start.load()*180.0f/M_PI, arm->m2_start.load()*180.0f/M_PI, arm->m3_start.load()*180.0f/M_PI);
+            printf("motor offset: %f, %f, %f \n", arm->m1_offset.load()*180.0f/M_PI, arm->m2_offset.load()*180.0f/M_PI, arm->m3_offset.load()*180.0f/M_PI);
+        }
         //printf("Brazo X Y theta: %f, %f, %f, %d \n", x_left, arm_y, arm_th, manual);
         //printf("Esto??: %d, %d, %d  \n", d1, d2, d3);
 

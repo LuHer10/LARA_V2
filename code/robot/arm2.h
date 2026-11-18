@@ -8,6 +8,7 @@
 #include <thread>
 #include <iostream>
 #include <atomic>
+#include <stdexcept>
 
 #include "servo.h"
 
@@ -26,7 +27,7 @@
 
 #define WRIST_ID 10
 
-float deg2rad(float _deg)
+inline float deg2rad(float _deg)
 {
     float _rad = _deg*M_PI/180.0f;
     return _rad;
@@ -56,7 +57,7 @@ public:
     Steadywin* smallMotor;
 
     std::thread controlThread;
-    bool stopThread = false;
+    std::atomic<bool> stopThread{false};
 
     std::atomic<float> m1_offset = 0.0f;
     std::atomic<float> m2_offset = 0.0f;
@@ -107,8 +108,23 @@ public:
         l3 = _l3;
 
         m1.store(bigMotor->getPositionRad());
+        bool bigOk = bigMotor->ok();
         m2.store(mediumMotor->get_position_rad());
+        bool medOk = mediumMotor->ok();
         m3.store(smallMotor->get_position_rad());
+        bool smallOk = smallMotor->ok();
+
+        if (!bigOk || !medOk || !smallOk)
+        {
+            // Offsets would be computed from garbage; refuse to run the arm.
+            delete bigMotor;
+            delete mediumMotor;
+            delete smallMotor;
+            throw std::runtime_error(std::string("Arm motors not responding:")
+                + (bigOk ? "" : " big(J1)")
+                + (medOk ? "" : " medium(J2)")
+                + (smallOk ? "" : " small(J3)"));
+        }
 
         m1_start.store(m1.load()); //->180
         m2_start.store(m2.load()); //->  0
@@ -247,7 +263,7 @@ public:
         _q1 = q_1;
         float alpha = _q1 + _q2 - M_PI;
 
-        _q3 = M_PI - alpha + th;
+        _q3 = M_PI - alpha + _th;
 
         return 0;
     }
@@ -348,41 +364,43 @@ public:
         //smallOffset.store(mSmaRaw.load() - deg2rad(180.0f));
     }
 
+    // Ramp the motor setpoints to (t1, t2, t3) in steps of `incr` rad every
+    // 20 ms. Blocks until every joint has reached its target, then resyncs
+    // the joint-space (q) and Cartesian (x, y, th) state.
+    void rampMotorsTo(float t1, float t2, float t3, float incr)
+    {
+        std::atomic<float>* m[3] = {&m1, &m2, &m3};
+        const float target[3] = {t1, t2, t3};
+
+        bool done = false;
+        while (!done)
+        {
+            done = true;
+            for (int i = 0; i < 3; i++)
+            {
+                float diff = target[i] - m[i]->load();
+                if (std::fabs(diff) <= incr)
+                    m[i]->store(target[i]);
+                else
+                {
+                    m[i]->store(m[i]->load() + (diff > 0 ? incr : -incr));
+                    done = false;
+                }
+            }
+            std::this_thread::sleep_for(std::chrono::milliseconds(20));
+        }
+
+        m2q();
+        DK();
+    }
+
     void home()
     {
-        float m1diff = m1.load() - m1_start.load();
-        float m2diff = m2.load() - m2_start.load();
-        float m3diff = m3.load() - m3_start.load();
-
-        bool condition = (abs(m1diff)>0.1f) && (abs(m2diff)>0.1f) && (abs(m3diff)>0.1f);
-        
-        float incr = 0.05f;
-
-        while(condition)
-        {
-            if(m1diff>0) m1.store(m1.load()-incr);
-            else if(m1diff<0) m1.store(m1.load()+incr);
-
-            if(m2diff>0) m2.store(m2.load()-incr);
-            else if(m2diff<0) m2.store(m2.load()+incr);
-            
-            if(m3diff>0) m3.store(m3.load()-incr);
-            else if(m3diff<0) m3.store(m3.load()+incr);
-        
-            m1diff = m1.load() - m1_start.load();
-            m2diff = m2.load() - m2_start.load();
-            m3diff = m3.load() - m3_start.load();
-
-            condition = (abs(m1diff)>0.1f) && (abs(m2diff)>0.1f) && (abs(m3diff)>0.1f);
-
-            std::this_thread::sleep_for(std::chrono::milliseconds(20));
-
-        }
+        rampMotorsTo(m1_start.load(), m2_start.load(), m3_start.load(), 0.05f);
     }
 
     void getUp()
     {
-
         float q1_target = M_PI/2.0f;
         float q2_target = M_PI/2.0f;
         float q3_target = M_PI;
@@ -391,37 +409,9 @@ public:
 
         q2m(q1_target, q2_target, q3_target, m1_target, m2_target, m3_target);
 
-        float m1diff = m1.load() - m1_target;
-        float m2diff = m2.load() - m2_target;
-        float m3diff = m3.load() - m3_target;
-
-        float incr = 0.01f;
-        bool condition = (abs(m1diff)>2.0f*incr) && (abs(m2diff)>2.0f*incr) && (abs(m3diff)>2.0f*incr);
-
-        while(condition)
-        {
-            if(m1diff>0) m1.store(m1.load()-incr);
-            else if(m1diff<0) m1.store(m1.load()+incr);
-
-            if(m2diff>0) m2.store(m2.load()-incr);
-            else if(m2diff<0) m2.store(m2.load()+incr);
-            
-            if(m3diff>0) m3.store(m3.load()-incr);
-            else if(m3diff<0) m3.store(m3.load()+incr);
-        
-            m1diff = m1.load() - m1_target;
-            m2diff = m2.load() - m2_target;
-            m3diff = m3.load() - m3_target;
-
-            condition = (abs(m1diff)>2.0f*incr) && (abs(m2diff)>2.0f*incr) && (abs(m3diff)>2.0f*incr);
-
-            std::this_thread::sleep_for(std::chrono::milliseconds(20));
-
-        }
+        rampMotorsTo(m1_target, m2_target, m3_target, 0.01f);
     }
 
-    
-    
 };
 
 #endif //ARM_H

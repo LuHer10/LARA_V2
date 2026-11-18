@@ -14,24 +14,14 @@ int Steadywin::reset_config()
     frame.data[6] = 0x00;
     frame.data[7] = 0x00;
 
-    if (can->sendFrame(frame)) {
-        #ifdef DEBUG
-        std::cout << "Frame sent\n";
-        #endif
-    }
-
     struct can_frame recv_frame;
     int retval;
 
-    while (true) {
-        if (can->receiveFrame(recv_frame)) {
-            retval  = recv_frame.data[1];
-            #ifdef DEBUG
-            std::cout << "Return value: " << retval << "\n";
-            #endif
-            break;
-        }
-    }
+    if (!transact(frame, recv_frame)) return -1;
+    retval  = recv_frame.data[1];
+    #ifdef DEBUG
+    std::cout << "Return value: " << retval << "\n";
+    #endif
     
     return  retval;    
 }
@@ -50,27 +40,17 @@ int Steadywin::refresh_config()
     frame.data[6] = 0x00;
     frame.data[7] = 0x00;
 
-    if (can->sendFrame(frame)) {
-        #ifdef DEBUG
-        std::cout << "Frame sent\n";
-        #endif
-    }
-
     struct can_frame recv_frame;
     int retval;
 
-    while (true) {
-        if (can->receiveFrame(recv_frame)) {
-            #ifdef DEBUG
-            std::cout << "Received frame\n";
-            #endif
-            retval  = recv_frame.data[1];
-            #ifdef DEBUG
-            std::cout << "Return value: " << retval << "\n";
-            #endif
-            break;
-        }
-    }
+    if (!transact(frame, recv_frame)) return -1;
+    #ifdef DEBUG
+    std::cout << "Received frame\n";
+    #endif
+    retval  = recv_frame.data[1];
+    #ifdef DEBUG
+    std::cout << "Return value: " << retval << "\n";
+    #endif
 
     return  retval;
 }
@@ -92,24 +72,14 @@ int Steadywin::mod_config(int confid, int32_t data)
     frame.data[6] = _data.u8[2];
     frame.data[7] = _data.u8[3];
 
-    if (can->sendFrame(frame)) {
-        #ifdef DEBUG
-        std::cout << "Frame sent\n";
-        #endif
-    }
-
     struct can_frame recv_frame;
     int retval;
 
-    while (true) {
-        if (can->receiveFrame(recv_frame)) {
-            retval  = recv_frame.data[3];
-            #ifdef DEBUG
-            std::cout << "Return value: " << retval << "\n";
-            #endif
-            break;
-        }
-    }
+    if (!transact(frame, recv_frame)) return -1;
+    retval  = recv_frame.data[3];
+    #ifdef DEBUG
+    std::cout << "Return value: " << retval << "\n";
+    #endif
     
     return  retval;
 }
@@ -128,24 +98,14 @@ int Steadywin::retr_config(uint8_t confid, int32_t& data)
     frame.data[6] = 0x00;
     frame.data[7] = 0x00;
 
-    if (can->sendFrame(frame)) {
-        #ifdef DEBUG
-        std::cout << "Frame sent\n";
-        #endif
-    }
-
     struct can_frame recv_frame;
     int retval;
 
-    while (true) {
-        if (can->receiveFrame(recv_frame)) {
-            retval  = recv_frame.data[3];
-            #ifdef DEBUG
-            std::cout << "Return value: " << retval << "\n";
-            #endif
-            break;
-        }
-    }
+    if (!transact(frame, recv_frame)) return -1;
+    retval  = recv_frame.data[3];
+    #ifdef DEBUG
+    std::cout << "Return value: " << retval << "\n";
+    #endif
 
     data = ((int32_t)recv_frame.data[7] << 24)
             + ((int32_t)recv_frame.data[6] << 16)
@@ -179,24 +139,14 @@ float Steadywin::get_torq_const()
     frame.data[6] = 0x00;
     frame.data[7] = 0x00;
 
-    if (can->sendFrame(frame)) {
-        #ifdef DEBUG
-        std::cout << "Frame sent\n";
-        #endif
-    }
-
     struct can_frame recv_frame;
     int retval;
 
-    while (true) {
-        if (can->receiveFrame(recv_frame)) {
-            retval  = recv_frame.data[3];
-            #ifdef DEBUG
-            std::cout << "Return value: " << retval << "\n";
-            #endif
-            break;
-        }
-    }
+    if (!transact(frame, recv_frame)) return torq_const;
+    retval  = recv_frame.data[3];
+    #ifdef DEBUG
+    std::cout << "Return value: " << retval << "\n";
+    #endif
 
     fl32u8 res;
     res.u8[0] = recv_frame.data[4];
@@ -224,24 +174,14 @@ int Steadywin::start_motor()
     frame.data[6] = 0x00;
     frame.data[7] = 0x00;
 
-    if (can->sendFrame(frame)) {
-        #ifdef DEBUG
-        std::cout << "Frame sent\n";
-        #endif
-    }
-
     struct can_frame recv_frame;
     int retval;
 
-    while (true) {
-        if (can->receiveFrame(recv_frame)) {
-            retval  = recv_frame.data[1];
-            #ifdef DEBUG
-            std::cout << "Return value: " << retval << "\n";
-            #endif
-            break;
-        }
-    }
+    if (!transact(frame, recv_frame)) return -1;
+    retval  = recv_frame.data[1];
+    #ifdef DEBUG
+    std::cout << "Return value: " << retval << "\n";
+    #endif
 
     
     return  retval;
@@ -261,24 +201,14 @@ int Steadywin::stop_motor()
     frame.data[6] = 0x00;
     frame.data[7] = 0x00;
 
-    if (can->sendFrame(frame)) {
-        #ifdef DEBUG
-        std::cout << "Frame sent\n";
-        #endif
-    }
-
     struct can_frame recv_frame;
     int retval;
 
-    while (true) {
-        if (can->receiveFrame(recv_frame)) {
-            retval  = recv_frame.data[1];
-            #ifdef DEBUG
-            std::cout << "Return value: " << retval << "\n";
-            #endif
-            break;
-        }
-    }
+    if (!transact(frame, recv_frame)) return -1;
+    retval  = recv_frame.data[1];
+    #ifdef DEBUG
+    std::cout << "Return value: " << retval << "\n";
+    #endif
 
     
     return  retval;
@@ -307,24 +237,14 @@ int Steadywin::torque_control(float _torque, uint32_t duration)
 
     
 
-    if (can->sendFrame(frame)) {
-        #ifdef DEBUG
-        std::cout << "Frame sent\n";
-        #endif
-    }
-
     struct can_frame recv_frame;
     int retval;
 
-    while (true) {
-        if (can->receiveFrame(recv_frame)) {
-            retval  = recv_frame.data[1];
-            #ifdef DEBUG
-            std::cout << "Return value: " << retval << "\n";
-            #endif
-            break;
-        }
-    }
+    if (!transact(frame, recv_frame)) return -1;
+    retval  = recv_frame.data[1];
+    #ifdef DEBUG
+    std::cout << "Return value: " << retval << "\n";
+    #endif
 
     temp = recv_frame.data[2];
 
@@ -369,24 +289,14 @@ int Steadywin::speed_control(float _speed, uint32_t duration)
 
     
 
-    if (can->sendFrame(frame)) {
-        #ifdef DEBUG
-        std::cout << "Frame sent\n";
-        #endif
-    }
-
     struct can_frame recv_frame;
     int retval;
 
-    while (true) {
-        if (can->receiveFrame(recv_frame)) {
-            retval  = recv_frame.data[1];
-            #ifdef DEBUG
-            std::cout << "Return value: " << retval << "\n";
-            #endif
-            break;
-        }
-    }
+    if (!transact(frame, recv_frame)) return -1;
+    retval  = recv_frame.data[1];
+    #ifdef DEBUG
+    std::cout << "Return value: " << retval << "\n";
+    #endif
 
     temp = recv_frame.data[2];
 
@@ -447,24 +357,14 @@ int Steadywin::pos_control_rad(float _pos, uint32_t duration)
 
     
 
-    if (can->sendFrame(frame)) {
-        #ifdef DEBUG
-        std::cout << "Frame sent\n";
-        #endif
-    }
-
     struct can_frame recv_frame;
     int retval;
 
-    while (true) {
-        if (can->receiveFrame(recv_frame)) {
-            retval  = recv_frame.data[1];
-            #ifdef DEBUG
-            std::cout << "Return value: " << retval << "\n";
-            #endif
-            break;
-        }
-    }
+    if (!transact(frame, recv_frame)) return -1;
+    retval  = recv_frame.data[1];
+    #ifdef DEBUG
+    std::cout << "Return value: " << retval << "\n";
+    #endif
 
     temp = recv_frame.data[2];
 
@@ -529,24 +429,14 @@ int Steadywin::stop_control()
     frame.data[6] = 0x00;
     frame.data[7] = 0x00;
 
-    if (can->sendFrame(frame)) {
-        #ifdef DEBUG
-        std::cout << "Frame sent\n";
-        #endif
-    }
-
     struct can_frame recv_frame;
     int retval;
 
-    while (true) {
-        if (can->receiveFrame(recv_frame)) {
-            retval  = recv_frame.data[1];
-            #ifdef DEBUG
-            std::cout << "Return value: " << retval << "\n";
-            #endif
-            break;
-        }
-    }
+    if (!transact(frame, recv_frame)) return -1;
+    retval  = recv_frame.data[1];
+    #ifdef DEBUG
+    std::cout << "Return value: " << retval << "\n";
+    #endif
 
     
     return  retval;
@@ -568,24 +458,14 @@ float Steadywin::get_position_rad()
     frame.data[6] = 0x00;
     frame.data[7] = 0x00;
 
-    if (can->sendFrame(frame)) {
-        #ifdef DEBUG
-        std::cout << "Frame sent\n";
-        #endif
-    }
-
     struct can_frame recv_frame;
     int retval;
 
-    while (true) {
-        if (can->receiveFrame(recv_frame)) {
-            retval  = recv_frame.data[2];
-            #ifdef DEBUG
-            std::cout << "Return value: " << retval << "\n";
-            #endif
-            break;
-        }
-    }
+    if (!transact(frame, recv_frame)) return pos_ind_rad;
+    retval  = recv_frame.data[2];
+    #ifdef DEBUG
+    std::cout << "Return value: " << retval << "\n";
+    #endif
 
     ang.u8[0] = recv_frame.data[4];
     ang.u8[1] = recv_frame.data[5];
@@ -622,24 +502,14 @@ float Steadywin::get_position_deg()
     frame.data[6] = 0x00;
     frame.data[7] = 0x00;
 
-    if (can->sendFrame(frame)) {
-        #ifdef DEBUG
-        std::cout << "Frame sent\n";
-        #endif
-    }
-
     struct can_frame recv_frame;
     int retval;
 
-    while (true) {
-        if (can->receiveFrame(recv_frame)) {
-            retval  = recv_frame.data[2];
-            #ifdef DEBUG
-            std::cout << "Return value: " << retval << "\n";
-            #endif
-            break;
-        }
-    }
+    if (!transact(frame, recv_frame)) return pos_ind_deg;
+    retval  = recv_frame.data[2];
+    #ifdef DEBUG
+    std::cout << "Return value: " << retval << "\n";
+    #endif
 
     ang.u8[0] = recv_frame.data[4];
     ang.u8[1] = recv_frame.data[5];
@@ -675,24 +545,14 @@ float Steadywin::get_speed_rpm()
     frame.data[6] = 0x00;
     frame.data[7] = 0x00;
 
-    if (can->sendFrame(frame)) {
-        #ifdef DEBUG
-        std::cout << "Frame sent\n";
-        #endif
-    }
-
     struct can_frame recv_frame;
     int retval;
 
-    while (true) {
-        if (can->receiveFrame(recv_frame)) {
-            retval  = recv_frame.data[2];
-            #ifdef DEBUG
-            std::cout << "Return value: " << retval << "\n";
-            #endif
-            break;
-        }
-    }
+    if (!transact(frame, recv_frame)) return speed_ind_rpms;
+    retval  = recv_frame.data[2];
+    #ifdef DEBUG
+    std::cout << "Return value: " << retval << "\n";
+    #endif
 
     speed.u8[0] = recv_frame.data[4];
     speed.u8[1] = recv_frame.data[5];
@@ -743,24 +603,14 @@ int Steadywin::mod_param(int param_id, uint32_t value)
     frame.data[6] = val.u8[2];
     frame.data[7] = val.u8[3];
 
-    if (can->sendFrame(frame)) {
-        #ifdef DEBUG
-        std::cout << "Frame sent\n";
-        #endif
-    }
-
     struct can_frame recv_frame;
     int retval;
 
-    while (true) {
-        if (can->receiveFrame(recv_frame)) {
-            retval  = recv_frame.data[2];
-            #ifdef DEBUG
-            std::cout << "Return value: " << retval << "\n";
-            #endif
-            break;
-        }
-    }
+    if (!transact(frame, recv_frame)) return -1;
+    retval  = recv_frame.data[2];
+    #ifdef DEBUG
+    std::cout << "Return value: " << retval << "\n";
+    #endif
 
     return  retval;
 }
@@ -779,24 +629,14 @@ int Steadywin::retr_param(int param_id, uint32_t& value)
     frame.data[6] = 0x00;
     frame.data[7] = 0x00;
 
-    if (can->sendFrame(frame)) {
-        #ifdef DEBUG
-        std::cout << "Frame sent\n";
-        #endif
-    }
-
     struct can_frame recv_frame;
     int retval;
 
-    while (true) {
-        if (can->receiveFrame(recv_frame)) {
-            retval  = recv_frame.data[2];
-            #ifdef DEBUG
-            std::cout << "Return value: " << retval << "\n";
-            #endif
-            break;
-        }
-    }
+    if (!transact(frame, recv_frame)) return -1;
+    retval  = recv_frame.data[2];
+    #ifdef DEBUG
+    std::cout << "Return value: " << retval << "\n";
+    #endif
 
     value = ((uint32_t)recv_frame.data[7] << 24)
             + ((uint32_t)recv_frame.data[6] << 16)
@@ -824,24 +664,14 @@ int Steadywin::get_version()
     frame.data[6] = 0x00;
     frame.data[7] = 0x00;
 
-    if (can->sendFrame(frame)) {
-        #ifdef DEBUG
-        std::cout << "Frame sent\n";
-        #endif
-    }
-
     struct can_frame recv_frame;
     int retval;
 
-    while (true) {
-        if (can->receiveFrame(recv_frame)) {
-            retval  = recv_frame.data[1];
-            #ifdef DEBUG
-            std::cout << "Return value: " << retval << "\n";
-            #endif
-            break;
-        }
-    }
+    if (!transact(frame, recv_frame)) return -1;
+    retval  = recv_frame.data[1];
+    #ifdef DEBUG
+    std::cout << "Return value: " << retval << "\n";
+    #endif
 
     _ver.u8[0] = recv_frame.data[4];
     _ver.u8[1] = recv_frame.data[5];
@@ -870,25 +700,15 @@ int Steadywin::get_fault()
     frame.data[6] = 0x00;
     frame.data[7] = 0x00;
 
-    if (can->sendFrame(frame)) {
-        #ifdef DEBUG
-        std::cout << "Frame sent\n";
-        #endif
-    }
-
     struct can_frame recv_frame;
     int retval;
     int faul;
 
-    while (true) {
-        if (can->receiveFrame(recv_frame)) {
-            retval  = recv_frame.data[1];
-            #ifdef DEBUG
-            std::cout << "Return value: " << retval << "\n";
-            #endif
-            break;
-        }
-    }
+    if (!transact(frame, recv_frame)) return -1;
+    retval  = recv_frame.data[1];
+    #ifdef DEBUG
+    std::cout << "Return value: " << retval << "\n";
+    #endif
 
     faul = recv_frame.data[2]; 
 
@@ -911,24 +731,14 @@ int Steadywin::ack_fault()
     frame.data[6] = 0x00;
     frame.data[7] = 0x00;
 
-    if (can->sendFrame(frame)) {
-        #ifdef DEBUG
-        std::cout << "Frame sent\n";
-        #endif
-    }
-
     struct can_frame recv_frame;
     int retval;
 
-    while (true) {
-        if (can->receiveFrame(recv_frame)) {
-            retval  = recv_frame.data[1];
-            #ifdef DEBUG
-            std::cout << "Return value: " << retval << "\n";
-            #endif
-            break;
-        }
-    }
+    if (!transact(frame, recv_frame)) return -1;
+    retval  = recv_frame.data[1];
+    #ifdef DEBUG
+    std::cout << "Return value: " << retval << "\n";
+    #endif
 
     
     return  retval;    
@@ -950,24 +760,14 @@ int Steadywin::retr_indicator(int ind_id, float& value)
     frame.data[6] = 0x00;
     frame.data[7] = 0x00;
 
-    if (can->sendFrame(frame)) {
-        #ifdef DEBUG
-        std::cout << "Frame sent\n";
-        #endif
-    }
-
     struct can_frame recv_frame;
     int retval;
 
-    while (true) {
-        if (can->receiveFrame(recv_frame)) {
-            retval  = recv_frame.data[2];
-            #ifdef DEBUG
-            std::cout << "Return value: " << retval << "\n";
-            #endif
-            break;
-        }
-    }
+    if (!transact(frame, recv_frame)) return -1;
+    retval  = recv_frame.data[2];
+    #ifdef DEBUG
+    std::cout << "Return value: " << retval << "\n";
+    #endif
 
     val.u8[0] = recv_frame.data[4];
     val.u8[1] = recv_frame.data[5];
@@ -994,24 +794,14 @@ int Steadywin::calibrate(int calib_type)
     frame.data[6] = 0x00;
     frame.data[7] = 0x00;
 
-    if (can->sendFrame(frame)) {
-        #ifdef DEBUG
-        std::cout << "Frame sent\n";
-        #endif
-    }
-
     struct can_frame recv_frame;
     int retval;
 
-    while (true) {
-        if (can->receiveFrame(recv_frame)) {
-            retval  = recv_frame.data[2];
-            #ifdef DEBUG
-            std::cout << "Return value: " << retval << "\n";
-            #endif
-            break;
-        }
-    }
+    if (!transact(frame, recv_frame)) return -1;
+    retval  = recv_frame.data[2];
+    #ifdef DEBUG
+    std::cout << "Return value: " << retval << "\n";
+    #endif
 
     
     return  retval;    
@@ -1110,3 +900,22 @@ void Steadywin::move_smooth_rad(float& ang, float& step_size)
     }
 }
 
+
+
+bool Steadywin::transact(const struct can_frame& request, struct can_frame& reply)
+{
+    // Steadywin replies echo the command byte in data[0]. Combined with the
+    // bus lock in SocketCAN::request (only one request outstanding at a time)
+    // this pairs every reply with the request that caused it.
+    const uint8_t cmd = request.data[0];
+    bool ok = can->request(request, reply,
+        [cmd](const struct can_frame& f) {
+            return !(f.can_id & (CAN_EFF_FLAG | CAN_RTR_FLAG | CAN_ERR_FLAG))
+                && f.can_dlc >= 2 && f.data[0] == cmd;
+        }, CAN_TIMEOUT_MS);
+    comm_ok = ok;
+    if (!ok)
+        std::cerr << "Steadywin id " << id << ": no reply to command 0x"
+                  << std::hex << (int)cmd << std::dec << "\n";
+    return ok;
+}

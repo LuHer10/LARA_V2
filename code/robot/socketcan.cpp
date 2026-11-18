@@ -9,6 +9,8 @@
 #include <linux/can/raw.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <poll.h>
+#include <chrono>
 
 SocketCAN::SocketCAN(const std::string& interface)
     : interface_(interface), socket_(-1), is_open_(false), is_non_blocking_(false) 
@@ -73,24 +75,26 @@ void SocketCAN::close() {
     }
 }
 
-bool SocketCAN::sendFrame(const struct can_frame& frame) {
+bool SocketCAN::writeFrameUnlocked(const struct can_frame& frame) {
     if (!is_open_) return false;
 
     int nbytes = write(socket_, &frame, sizeof(frame));
 
     if (nbytes < 0) {
-        if (errno == EAGAIN || errno == EWOULDBLOCK) {
-            // Would block → not an error in non-blocking mode
-            return false;
-        }
-        //perror("write");
+        // EAGAIN/EWOULDBLOCK (non-blocking, tx queue full) or a real error
         return false;
     }
 
     return nbytes == sizeof(frame);
 }
 
+bool SocketCAN::sendFrame(const struct can_frame& frame) {
+    std::lock_guard<std::mutex> lock(bus_mtx_);
+    return writeFrameUnlocked(frame);
+}
+
 bool SocketCAN::receiveFrame(struct can_frame& frame) {
+    std::lock_guard<std::mutex> lock(bus_mtx_);
     if (!is_open_) return false;
 
     int nbytes = read(socket_, &frame, sizeof(frame));
@@ -106,6 +110,45 @@ bool SocketCAN::receiveFrame(struct can_frame& frame) {
     }
 
     return nbytes == sizeof(frame);
+}
+
+void SocketCAN::drainUnlocked() {
+    struct can_frame junk;
+    while (recv(socket_, &junk, sizeof(junk), MSG_DONTWAIT) > 0) {}
+}
+
+bool SocketCAN::request(const struct can_frame& request, struct can_frame& reply,
+                        const std::function<bool(const struct can_frame&)>& match,
+                        int timeout_ms) {
+    using clock = std::chrono::steady_clock;
+    std::lock_guard<std::mutex> lock(bus_mtx_);
+    if (!is_open_) return false;
+
+    drainUnlocked();
+    if (!writeFrameUnlocked(request)) return false;
+
+    const auto deadline = clock::now() + std::chrono::milliseconds(timeout_ms);
+    while (true) {
+        long remaining = std::chrono::duration_cast<std::chrono::milliseconds>(
+                             deadline - clock::now()).count();
+        if (remaining <= 0) return false;
+
+        struct pollfd pfd{socket_, POLLIN, 0};
+        int r = poll(&pfd, 1, (int)remaining);
+        if (r < 0) {
+            if (errno == EINTR) continue;
+            return false;
+        }
+        if (r == 0) return false; // timeout
+
+        struct can_frame frame;
+        ssize_t n = recv(socket_, &frame, sizeof(frame), MSG_DONTWAIT);
+        if (n == (ssize_t)sizeof(frame) && match(frame)) {
+            reply = frame;
+            return true;
+        }
+        // otherwise: unrelated frame, keep waiting
+    }
 }
 
 int SocketCAN::getSocket() const {

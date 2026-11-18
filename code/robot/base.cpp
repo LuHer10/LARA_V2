@@ -1,24 +1,23 @@
 #include "base.h"
 
+// Units: vx, vy in m/s (robot frame), vrad in rad/s; vm[] wheel speeds in rad/s.
+// FK is the exact inverse of IK below, including the front-wheel swap, so the
+// encoder index i always refers to the same motor that received vm[i].
 inline void Base::FK(const float vm[4], float &vx, float &vy, float &vrad)
 {
-    vx   = WHEEL_RADIUS * (-vm[0] + vm[1] + vm[2] - vm[3])/4.0F;
+    vx   = WHEEL_RADIUS * (-vm[0] + vm[1] - vm[2] + vm[3])/4.0F;
     vy   = WHEEL_RADIUS * ( vm[0] + vm[1] + vm[2] + vm[3])/4.0F;
-    vrad = WHEEL_RADIUS * (-vm[0] + vm[1] - vm[2] + vm[3])/(4.0F*LXY);
+    vrad = WHEEL_RADIUS * ( vm[0] - vm[1] - vm[2] + vm[3])/(4.0F*LXY);
 }
 
 inline void Base::IK(const float &vx, const float &vy, const float &vrad, float vm[4])
 {
-    // Cambiado por David (motor 0 por motor 1) 
+    // Cambiado por David (motor 0 por motor 1)
     // porque ruedas delanteras están cableadas al revés
-    vm[1] = ( vx + vy - vrad*LXY) /* WHEEL_RADIUS*/;
-    vm[0] = (-vx + vy + vrad*LXY) /* WHEEL_RADIUS*/;
-    vm[2] = (-vx + vy - vrad*LXY) /* WHEEL_RADIUS*/;
-    vm[3] = ( vx + vy + vrad*LXY) /* WHEEL_RADIUS*/;
-    //vm[0] = 0;
-    //vm[1] = 0;
-    //vm[2] = 0;
-    //vm[3] = 0;
+    vm[1] = ( vx + vy - vrad*LXY) / WHEEL_RADIUS;
+    vm[0] = (-vx + vy + vrad*LXY) / WHEEL_RADIUS;
+    vm[2] = (-vx + vy - vrad*LXY) / WHEEL_RADIUS;
+    vm[3] = ( vx + vy + vrad*LXY) / WHEEL_RADIUS;
 }
 
 void Base::setVelocity(float vx, float vy, float vrad)

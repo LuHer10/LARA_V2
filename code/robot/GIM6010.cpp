@@ -188,18 +188,18 @@ void GIM6010::MITControl(float pos, float vel, float torq, float kp, float kd)
     frame.data[6] = ((kd_int & 0xF) << 4) + (torq_int >> 8);
     frame.data[7] = torq_int & 0xFF;
 
-    if (can->sendFrame(frame)) {
-        #ifdef DEBUG
-        std::cout << "Frame sent\n";
-        #endif
-    }
-
     struct can_frame recv_frame;
-
-    while (true) {
-        if (can->receiveFrame(recv_frame)) {
-            break;
-        }
+    const uint8_t node = id;
+    // Accept any standard frame from this node: (node_id << 5) | cmd
+    bool ok = can->request(frame, recv_frame,
+        [node](const struct can_frame& f) {
+            return !(f.can_id & (CAN_EFF_FLAG | CAN_RTR_FLAG | CAN_ERR_FLAG))
+                && ((f.can_id & CAN_SFF_MASK) >> 5) == node;
+        }, GIM6010_TIMEOUT_MS);
+    comm_ok = ok;
+    if (!ok) {
+        std::cerr << "GIM6010 id " << (int)id << ": no reply to MIT command\n";
+        return;
     }
 
     float pos_out = ((float)(recv_frame.data[1] << 8 | recv_frame.data[2]) * 25.0f / 65535) - 12.5f;
@@ -223,7 +223,7 @@ void GIM6010::stop_motor()
     setAxisState(MW_AXIS_STATE_IDLE);
 }
 
-void GIM6010::getEncoderEstimates(float& _pos, float& _vel)
+bool GIM6010::getEncoderEstimates(float& _pos, float& _vel)
 {
     // Implementation for getting encoder estimates
 
@@ -239,20 +239,19 @@ void GIM6010::getEncoderEstimates(float& _pos, float& _vel)
     frame.data[6] = 0x00;
     frame.data[7] = 0x00;
 
-    if (can->sendFrame(frame)) {
-        #ifdef DEBUG
-        std::cout << "Frame sent\n";
-        #endif
-    }
-
-    // Wait for response and parse the received data to get pos and vel
+    // Wait for this node's encoder-estimate reply
     struct can_frame recv_frame;
-
-    while (true) {
-        if (can->receiveFrame(recv_frame)) {
-            //std::cout << "Received ID: " << (recv_frame.can_id >> 5) << "\n";
-            break;
-        }
+    const canid_t expected = frame.can_id;
+    bool ok = can->request(frame, recv_frame,
+        [expected](const struct can_frame& f) {
+            return !(f.can_id & (CAN_EFF_FLAG | CAN_RTR_FLAG | CAN_ERR_FLAG))
+                && (f.can_id & CAN_SFF_MASK) == expected
+                && f.can_dlc == 8;
+        }, GIM6010_TIMEOUT_MS);
+    comm_ok = ok;
+    if (!ok) {
+        std::cerr << "GIM6010 id " << (int)id << ": no encoder reply\n";
+        return false;
     }
 
     //float pos_out = _pos.fl;
@@ -265,29 +264,33 @@ void GIM6010::getEncoderEstimates(float& _pos, float& _vel)
     //std::cout << "Position: " << pos_out << ", Velocity: " << vel_out << "\n";
     _pos = pos_out;
     _vel = vel_out;
+    return true;
 }
 
-void GIM6010::getEncoderEstimates_rad(float& _pos, float& _vel)
+bool GIM6010::getEncoderEstimates_rad(float& _pos, float& _vel)
 {
     float revPos;
     float revVel;
-    getEncoderEstimates(revPos, revVel);
-    _pos = revPos*2.0f*M_PI/48.0f;
-    _vel = revVel*2.0f*M_PI/48.0f;
+    if (!getEncoderEstimates(revPos, revVel)) return false;
+    _pos = revPos*2.0f*M_PI/gear_ratio;
+    _vel = revVel*2.0f*M_PI/gear_ratio;
+    return true;
 }
 
-void GIM6010::getEncoderEstimates_deg(float& _pos, float& _vel)
+bool GIM6010::getEncoderEstimates_deg(float& _pos, float& _vel)
 {
     float revPos;
     float revVel;
-    getEncoderEstimates(revPos, revVel);
-    _pos = revPos*360.0f/48.0f;
-    _vel = revVel*360.0f/48.0f;
+    if (!getEncoderEstimates(revPos, revVel)) return false;
+    _pos = revPos*360.0f/gear_ratio;
+    _vel = revVel*360.0f/gear_ratio;
+    return true;
 }
 
 float GIM6010::getPositionRad()
 {
     float _pos, _vel;
-    getEncoderEstimates_rad(_pos, _vel);
-    return _pos;
+    if (getEncoderEstimates_rad(_pos, _vel))
+        last_pos_rad = _pos;
+    return last_pos_rad; // last good value if this read timed out
 }

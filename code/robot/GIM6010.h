@@ -8,6 +8,9 @@
 #include <mutex>
 #include <chrono>
 #include <math.h>
+#include <atomic>
+
+#define GIM6010_TIMEOUT_MS 20 // max wait for a motor reply
 
 
     typedef enum {
@@ -84,11 +87,14 @@ private:
     SocketCAN* can;
     uint8_t id;
 
-    float pos;
-    float vel;
-    float torq;
+    float pos = 0.0f;
+    float vel = 0.0f;
+    float torq = 0.0f;
 
     float gear_ratio;
+
+    float last_pos_rad = 0.0f;
+    std::atomic<bool> comm_ok{false};
     
 public:
 
@@ -118,9 +124,13 @@ public:
     void start_motor();
     void stop_motor();
 
-    void getEncoderEstimates(float& pos, float& vel);
-    void getEncoderEstimates_rad(float& pos, float& vel);
-    void getEncoderEstimates_deg(float& pos, float& vel);
+    // Return false if the motor did not answer within GIM6010_TIMEOUT_MS.
+    bool getEncoderEstimates(float& pos, float& vel);
+    bool getEncoderEstimates_rad(float& pos, float& vel);
+    bool getEncoderEstimates_deg(float& pos, float& vel);
+
+    // True if the last request to this motor got a reply in time.
+    bool ok() const { return comm_ok.load(); }
 
     float getPositionRad();
 
