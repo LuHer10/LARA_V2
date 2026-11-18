@@ -1,0 +1,345 @@
+#include "arm.h"
+
+void Arm::motorControl()
+{
+    std::cout << "Motor control active\n";
+    while(true)
+    {
+        if(stopThread) break;
+
+        bigMotor->pos_ctrl_red_rad(m1.load());
+        mediumMotor->pos_control_rad((m2.load()));
+        smallMotor->pos_control_rad(m3.load());
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+
+        mBig.store(bigMotor->getPositionRad());
+        mMed.store(mediumMotor->get_position_rad());
+        mSmall.store(smallMotor->get_position_rad());
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+
+    }
+    std::cout << "Motor control inactive\n";
+
+}
+
+Arm::Arm(SocketCAN* _can, float _l1, float _l2, float _l3):can(_can)
+{
+    bigMotor = new GIM6010(can, BIG_ID);
+    mediumMotor = new Steadywin(can, MEDIUM_ID, GIM4310_36);
+    smallMotor = new Steadywin(can, SMALL_ID, GIM3505_8);
+
+    bigMotor->start_motor();
+    mediumMotor->start_motor();
+    smallMotor->start_motor();
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+    bigMotor->setTrapezodialMode();
+
+    l1 = _l1;
+    l2 = _l2;
+    l3 = _l3;
+
+    m1.store(bigMotor->getPositionRad());
+    bool bigOk = bigMotor->ok();
+    m2.store(mediumMotor->get_position_rad());
+    bool medOk = mediumMotor->ok();
+    m3.store(smallMotor->get_position_rad());
+    bool smallOk = smallMotor->ok();
+
+    if (!bigOk || !medOk || !smallOk)
+    {
+        // Offsets would be computed from garbage; refuse to run the arm.
+        delete bigMotor;
+        delete mediumMotor;
+        delete smallMotor;
+        throw std::runtime_error(std::string("Arm motors not responding:")
+            + (bigOk ? "" : " big(J1)")
+            + (medOk ? "" : " medium(J2)")
+            + (smallOk ? "" : " small(J3)"));
+    }
+
+    m1_start.store(m1.load()); //->180
+    m2_start.store(m2.load()); //->  0
+    m3_start.store(m3.load()); //->360
+    /*
+        180 = m1_start + m1_offset
+        q1 = m1 + m1_offset
+    */
+
+    m1_offset.store(M1_REST - m1_start.load());
+    m2_offset.store(M2_REST - m2_start.load());
+    m3_offset.store(M3_REST - m3_start.load());
+
+    //q1.store(m1.load()+m1_offset.load());
+    //q2.store(m2.load()+m2_offset.load());
+    //q3.store(m3.load()+m3_offset.load());
+
+    m2q(m1, m2, m3, q1, q2, q3);
+
+    DK();
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+    controlThread = std::thread(&Arm::motorControl, this);
+
+    servos.init();
+    servos.enableTorque(GRIP_ID);
+
+}
+
+Arm::~Arm()
+{
+    stopThread = true;
+    controlThread.join();
+    bigMotor->stop_motor();
+    mediumMotor->stop_motor();
+    smallMotor->stop_motor();
+}
+
+void Arm::m2q(float _m1, float _m2, float _m3,
+    float& _q1, float& _q2, float& _q3)
+{
+    _q1 = m1_offset.load() - _m1;  //ok
+    _q2 = _m2 + m2_offset.load();  //ok
+    _q3 = _m3 + m3_offset.load();
+}
+
+void Arm::q2m(float _q1, float _q2, float _q3,
+    float& _m1, float& _m2, float& _m3)
+{
+    _m1 = m1_offset.load() - _q1; //ok
+    _m2 = _q2 - m2_offset.load(); //ok
+    _m3 = _q3 - m3_offset.load();
+}
+
+void Arm::m2q(std::atomic<float>& _m1, std::atomic<float>& _m2, std::atomic<float>& _m3,
+    std::atomic<float>& _q1, std::atomic<float>& _q2, std::atomic<float>& _q3)
+{
+    float m1a = _m1.load(), m2a = _m2.load(), m3a = _m3.load();
+    float q1a, q2a, q3a;
+    m2q(m1a, m2a, m3a, q1a, q2a, q3a);
+    _q1.store(q1a);
+    _q2.store(q2a);
+    _q3.store(q3a);
+}
+
+void Arm::m2q()
+{
+    float m1a = m1.load(), m2a = m2.load(), m3a = m3.load();
+    float q1a, q2a, q3a;
+    m2q(m1a, m2a, m3a, q1a, q2a, q3a);
+    q1.store(q1a);
+    q2.store(q2a);
+    q3.store(q3a);
+}
+
+void Arm::q2m(std::atomic<float>& _q1, std::atomic<float>& _q2, std::atomic<float>& _q3,
+    std::atomic<float>& _m1, std::atomic<float>& _m2, std::atomic<float>& _m3)
+{
+    float q1a = _q1.load(), q2a = _q2.load(), q3a = _q3.load();
+    float m1a, m2a, m3a;
+    q2m(q1a, q2a, q3a, m1a, m2a, m3a);
+    _m1.store(m1a);
+    _m2.store(m2a);
+    _m3.store(m3a);
+}
+
+void Arm::q2m()
+{
+    float q1a = q1.load(), q2a = q2.load(), q3a = q3.load();
+    float m1a, m2a, m3a;
+    q2m(q1a, q2a, q3a, m1a, m2a, m3a);
+    m1.store(m1a);
+    m2.store(m2a);
+    m3.store(m3a);
+}
+
+void Arm::enable()
+{
+    bigMotor->start_motor();
+    mediumMotor->start_motor();
+    smallMotor->start_motor();
+}
+
+void Arm::disable()
+{
+    bigMotor->stop_motor();
+    mediumMotor->stop_motor();
+    smallMotor->stop_motor();
+}
+
+void Arm::open(){servos.writePos(GRIP_ID, degToPos(230));}
+
+void Arm::close(){servos.writePos(GRIP_ID, degToPos(170));}
+
+void Arm::moveWristIncr(int dir)
+{
+    if(dir != 0)
+    {
+        wristAngle += dir*0.5f;
+        servos.writePos(WRIST_ID, degToPos(wristAngle));
+    }
+}
+
+
+int Arm::IK(float _x, float _y, float _th, float& _q1, float& _q2, float& _q3)
+{
+    float wx = _x - l3*cos(_th);
+    float wy = _y - l3*sin(_th);
+    float wl = sqrt(wx*wx + wy*wy);
+
+    float q_2 = acos((l1*l1 + l2*l2 - wx*wx - wy*wy)/(2.0f * l1 * l2));
+    float q_1 = atan2(wy, wx) + asin((l2 * sin(q_2))/wl);
+
+    if(std::isnan(q_1) || std::isnan(q_2)) return 1;
+
+    _q2 = q_2;
+    _q1 = q_1;
+    float alpha = _q1 + _q2 - M_PI;
+
+    _q3 = M_PI - alpha + _th;
+
+    return 0;
+}
+
+int Arm::IK()
+{
+    float _q1, _q2, _q3;
+    if(IK(x.load(), y.load(), th.load(), _q1, _q2, _q3))return 1;
+    q1.store(_q1);
+    q2.store(_q2);
+    q3.store(_q3);
+    return 0;
+}
+
+void Arm::DK(float _q1, float _q2, float _q3, float& _x, float& _y, float& _th)
+{
+    float alpha = _q1 + _q2 - M_PI;
+    _x = l1 * cos(_q1) + l2 * cos(_q1 + _q2 - M_PI) + l3 * cos(_q1 + _q2 + _q3 - 2.0f*M_PI);
+    _y = l1 * sin(_q1) + l2 * sin(_q1 + _q2 - M_PI) + l3 * sin(_q1 + _q2 + _q3 - 2.0f*M_PI);
+    _th = _q3 - M_PI + alpha;
+}
+
+void Arm::DK()
+{
+    float _x, _y, _th;
+    DK(q1.load(), q2.load(), q3.load(), _x, _y, _th);
+    x.store(_x);
+    y.store(_y);
+    th.store(_th);
+}
+
+void Arm::getQs(float& _q1, float& _q2, float& _q3)
+{
+    _q1 = q1.load();
+    _q2 = q2.load();
+    _q3 = q3.load();
+}
+
+void Arm::getCoord(float& _x, float& _y, float& _th)
+{
+    _x = x.load();
+    _y = y.load();
+    _th = th.load();
+}
+
+void Arm::getMqs(float& _m1, float& _m2, float& _m3)
+{
+    _m1 = m1.load();
+    _m2 = m2.load();
+    _m3 = m3.load();
+}
+
+void Arm::moveCoord(float _x, float _y, float _th)
+{
+    x.store(_x);
+    y.store(_y);
+    th.store(_th);
+    IK();
+    q2m();
+}
+
+void Arm::moveCoordIncr(float dx, float dy, float dth)
+{
+    float newX = x.load() + dx;
+    float newY = y.load() + dy;
+    float newTh = th.load() + dth;
+    float _q1, _q2, _q3;
+
+    if(IK(newX, newY, newTh, _q1, _q2, _q3)) return;
+
+    x.store(newX);
+    y.store(newY);
+    th.store(newTh);
+
+    //x += dx;
+    //y += dy;
+    //th += dth;
+    IK();
+    q2m();
+}
+
+void Arm::moveQs_incr(float dq1, float dq2, float dq3)
+{
+    q1.store(q1.load() + dq1);
+    q2.store(q2.load() + dq2);
+    q3.store(q3.load() + dq3);
+    q2m();
+    DK();
+}
+
+void Arm::setOffset()
+{
+    //mBigRaw.store(bigMotor->getPositionRad() + (M_PI/2.0f));
+    //mMedRaw.store(-mediumMotor->get_position_rad());
+    //mSmaRaw.store(smallMotor->get_position_rad());
+    //bigOffset.store(mBigRaw.load() - deg2rad(90.0f));
+    //mediumOffset.store(mMedRaw.load() - deg2rad(90.0f));
+    //smallOffset.store(mSmaRaw.load() - deg2rad(180.0f));
+}
+
+void Arm::rampMotorsTo(float t1, float t2, float t3, float incr)
+{
+    std::atomic<float>* m[3] = {&m1, &m2, &m3};
+    const float target[3] = {t1, t2, t3};
+
+    bool done = false;
+    while (!done)
+    {
+        done = true;
+        for (int i = 0; i < 3; i++)
+        {
+            float diff = target[i] - m[i]->load();
+            if (std::fabs(diff) <= incr)
+                m[i]->store(target[i]);
+            else
+            {
+                m[i]->store(m[i]->load() + (diff > 0 ? incr : -incr));
+                done = false;
+            }
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(20));
+    }
+
+    m2q();
+    DK();
+}
+
+void Arm::home()
+{
+    rampMotorsTo(m1_start.load(), m2_start.load(), m3_start.load(), 0.05f);
+}
+
+void Arm::getUp()
+{
+    float q1_target = M_PI/2.0f;
+    float q2_target = M_PI/2.0f;
+    float q3_target = M_PI;
+
+    float m1_target, m2_target, m3_target;
+
+    q2m(q1_target, q2_target, q3_target, m1_target, m2_target, m3_target);
+
+    rampMotorsTo(m1_target, m2_target, m3_target, 0.01f);
+}

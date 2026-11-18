@@ -9,7 +9,7 @@
 
 #include "../robot/base.h"
 #include "../robot/network.h"
-#include "../robot/arm2.h"
+#include "../robot/arm.h"
 
 // Joystick full-scale speeds. Base::setVelocity takes SI units (m/s, rad/s);
 // these reproduce the speeds the robot had before the IK unit fix

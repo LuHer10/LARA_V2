@@ -3,6 +3,7 @@
 add_library(robotlib
     roboclaw.cpp
     base.cpp
+    arm.cpp
     network.cpp
     servo.cpp
     steadywin.cpp
