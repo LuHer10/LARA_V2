@@ -25,6 +25,7 @@ int main() {
     if (!canOk) {
         std::cerr << "Failed to open CAN: running base only, arm disabled\n";
     } else {
+        std::cout << "CAN OK\n";
         can.setNonBlocking(true);
     }
 
@@ -72,6 +73,7 @@ int main() {
     if (canOk) {
         try {
             arm = std::make_unique<Arm>(&can, l1, l2, l3);
+            std::cout << "Arm initialized\n";
             arm->getCoord(arm_x, arm_y, arm_th);
             arm->getQs(q1, q2, q3);
         } catch (const std::exception& e) {
@@ -165,7 +167,7 @@ int main() {
                 // X en la ap es el eje horizontal
                 // Y en la ap es el eje vertical
                 base.setVelocity(x_left*MAX_LIN_SPEED, y_left*MAX_LIN_SPEED, -x_right*MAX_ANG_SPEED);
-                //base.setVelocity(0.0f, 0.0f, 0.0f);
+                base.setVelocity(0.0f, 0.0f, 0.0f);
                 base.sendSpeed();
                 
             }
@@ -178,7 +180,7 @@ int main() {
         }
 
         //arm.moveCoordIncr(x_right*0.001f, y_right*0.001f, 0.0f);
-        if (arm) arm->moveQs_incr(0.01f*d1, 0.01f*d2, 0.01f*d3);
+        if (arm) arm->moveQs_incr(0.001f*d1, 0.001f*d2, 0.001f*d3);
 
         //if(!omni)
         //{

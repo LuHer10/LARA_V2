@@ -157,7 +157,11 @@ public:
     }
 
     // True if the last command to this motor got a reply in time.
-    bool ok() const { return comm_ok.load(); }
+    bool ok() const 
+    {
+        std::cout << "Motor " << id << " OK\n";
+        return comm_ok.load(); 
+    }
 
     float get_torq_const();
     int32_t get_gear_ratio();

@@ -130,7 +130,11 @@ public:
     bool getEncoderEstimates_deg(float& pos, float& vel);
 
     // True if the last request to this motor got a reply in time.
-    bool ok() const { return comm_ok.load(); }
+    bool ok() const 
+    {
+        std::cout << "Motor " << id << " OK\n";
+        return comm_ok.load();
+    }
 
     float getPositionRad();
 
