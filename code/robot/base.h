@@ -66,6 +66,7 @@ public:
         roboclaw.resetEncoders(BACK_ADDRESS);
         roboclaw.M1M2Speed(FRONT_ADDRESS, 0, 0);
         roboclaw.M1M2Speed(BACK_ADDRESS, 0, 0);
+        roboclaw.finishInit(); // from here on: blocking reads, missing boards skipped
         resetOdometry();
     }
 
