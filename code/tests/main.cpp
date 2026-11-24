@@ -167,7 +167,7 @@ int main() {
                 // X en la ap es el eje horizontal
                 // Y en la ap es el eje vertical
                 base.setVelocity(x_left*MAX_LIN_SPEED, y_left*MAX_LIN_SPEED, -x_right*MAX_ANG_SPEED);
-                base.setVelocity(0.0f, 0.0f, 0.0f);
+                //base.setVelocity(0.0f, 0.0f, 0.0f);
                 base.sendSpeed();
                 
             }
