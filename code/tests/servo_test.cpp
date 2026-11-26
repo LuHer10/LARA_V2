@@ -5,7 +5,7 @@
 int main()
 {
     Servo servos;
-    servos.init();
+    servos.init("/dev/ttyAMA1");
 
     //servos.extPosContMode(11);
     //servos.extPosContMode(20);
@@ -21,7 +21,7 @@ int main()
     //servos.enableTorque(11);
     //servos.enableTorque(30);
     //servos.enableTorque(40);
-    servos.enableTorque(10);
+    //servos.enableTorque(10);
     servos.enableTorque(50);
 
     //servos.writePos(11, degToPos(90));
@@ -29,13 +29,13 @@ int main()
     //servos.writePos(30, -500); //1655 -200
     
     
-    servos.writePos(50, degToPos(90));
-    servos.writePos(10, degToPos(150));
+    servos.writePos(50, degToPos(230));
+    //servos.writePos(10, degToPos(150));
 
     sleep(2);
 
-    servos.writePos(10, degToPos(180));
-    servos.writePos(50, degToPos(135));
+    //servos.writePos(10, degToPos(180));
+    servos.writePos(50, degToPos(170));
     
     sleep(2);
 
