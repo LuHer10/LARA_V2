@@ -199,6 +199,12 @@ public:
     void move_smooth_deg(float& ang, float& step_size); //Use only in a thread, as it is a blocking function that will continuously update the position until the target angle is reached. Step size is in deg/s.
     void move_smooth_rad(float& ang, float& step_size); //Use only in a thread, as it is a blocking function that will continuously update the position until the target angle is reached. Step size is in rad/s.
 
+    int get_KP_current();
+    int get_KI_current();
+    int get_KP_speed();
+    int get_KI_speed();
+    int get_KP_position();
+    int get_KI_position();
 };
 
 #endif

@@ -919,3 +919,47 @@ bool Steadywin::transact(const struct can_frame& request, struct can_frame& repl
                   << std::hex << (int)cmd << std::dec << "\n";
     return ok;
 }
+
+int Steadywin::get_KP_current()
+{
+    int data;
+    retr_config(DEF_KP_CURRENT, data);
+    return data;
+}
+
+int Steadywin::get_KI_current()
+{
+    int data;
+    retr_config(DEF_KI_CURRENT, data);
+    return data;
+}
+
+int Steadywin::get_KP_speed()
+{
+    int data;
+    retr_config(DEF_KP_SPEED, data);
+    return data;
+}
+
+int Steadywin::get_KI_speed()
+{
+    int data;
+    retr_config(DEF_KI_SPEED, data);
+    return data;
+}
+
+int Steadywin::get_KP_position()
+{
+    int data;
+    retr_config(DEF_KP_POSITION, data);
+    return data;
+}
+
+int Steadywin::get_KI_position()
+{
+    int data;
+    retr_config(DEF_KI_POSITION, data);
+    return data;
+}
+
+
