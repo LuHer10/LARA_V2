@@ -1,35 +1,52 @@
 #include "servo.h"
 
-int Servo::init()
+#include <sys/ioctl.h>
+#include <linux/serial.h>
+#include <unistd.h>
+
+Servo::~Servo()
 {
-    portHandler = dynamixel::PortHandler::getPortHandler(DEVICENAME);
-    packetHandler = dynamixel::PacketHandler::getPacketHandler(PROTOCOL_VERSION);
-    
-    // Open port
-    if (portHandler->openPort()) {
-        printf("Succeeded to open the port!\n");
-    }
-    else {
-        printf("Failed to open the port!\n");
-        printf("Press any key to terminate...\n");
-        return -1;
+    if(rs485Fd != -1) close(rs485Fd);
+}
+
+// Puts the UART in RS485 mode: the kernel raises RTS while sending and lowers
+// it afterwards, switching the half-duplex buffer between TX and RX.
+bool Servo::enableRS485(const char *devName)
+{
+    if(rs485Fd != -1) close(rs485Fd);
+    rs485Fd = open(devName, O_RDWR | O_NOCTTY | O_NONBLOCK);
+    if(rs485Fd == -1)
+    {
+        perror("[WARNING] Servo: unable to open port for RS485 setup");
+        return false;
     }
 
-    // Set port baudrate
-    if (portHandler->setBaudRate(BAUDRATE)) {
-        printf("Succeeded to change the baudrate!\n");
+    struct serial_rs485 rs485{};
+    rs485.flags = SER_RS485_ENABLED | SER_RS485_RTS_ON_SEND; // RTS high while sending
+    rs485.delay_rts_before_send = 0;
+    rs485.delay_rts_after_send = 0;
+    if(ioctl(rs485Fd, TIOCSRS485, &rs485) < 0)
+    {
+        perror("[WARNING] Servo: unable to enable RS485 mode (RTS direction control)");
+        close(rs485Fd);
+        rs485Fd = -1;
+        return false;
     }
-    else {
-        printf("Failed to change the baudrate!\n");
-        printf("Press any key to terminate...\n");
-        return -2;
-    }
-    return 0;
+    printf("RS485 mode enabled on %s (RTS high while sending)\n", devName);
+    return true;
+}
+
+int Servo::init()
+{
+    return init(DEVICENAME);
 }
 
 int Servo::init(const char *devName)
 {
-    initialized = true;
+    //initialized = true;
+#if USE_RS485_RTS_DIRECTION
+    enableRS485(devName);
+#endif
     portHandler = dynamixel::PortHandler::getPortHandler(devName);
     packetHandler = 
         dynamixel::PacketHandler::getPacketHandler(PROTOCOL_VERSION);

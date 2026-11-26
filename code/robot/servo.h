@@ -28,8 +28,12 @@
 
 #define PROTOCOL_VERSION  2.0
 
-//#define DEVICENAME  "/dev/ttyAMA2"
-#define DEVICENAME  "/dev/ttyUSB0"
+//#define DEVICENAME  "/dev/ttyUSB0"
+#define DEVICENAME  "/dev/ttyAMA1" // GPIO UART1 (dtoverlay=uart1,ctsrts)
+
+// Half-duplex direction control: the UART drives RTS high while transmitting
+// (RS485 mode in the kernel). Set to 0 when using a USB adapter (U2D2 etc.).
+#define USE_RS485_RTS_DIRECTION 1
 
 #define TORQUE_ENABLE                   1
 #define TORQUE_DISABLE                  0
@@ -76,7 +80,13 @@ private:
 
     bool torque_enabled[253] = {false};
 
+    // Kept open so the kernel RS485 (RTS direction) setting stays applied.
+    int rs485Fd = -1;
+    bool enableRS485(const char *devName);
+
 public:
+    ~Servo();
+
     int init();
     int init(const char *devName);
 
